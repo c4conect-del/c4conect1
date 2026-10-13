@@ -83,6 +83,14 @@ return async function handleCatalogRequest(request: Request) {
       (await db.prepare('DELETE FROM sessions WHERE hash=?').run(auth.hash));
       headers['Set-Cookie'] = cookie('', request, 0); return json({ ok: true });
     }
+    if (path === '/api/admin/products/consultation' && request.method === 'POST') {
+      const input = await body(request);
+      const brandSlug = text(input.brandSlug, 'Marca');
+      if (!seed.some(brand => brand.slug === brandSlug)) fail('Selecione uma marca válida.');
+      if (!(await db.prepare('SELECT id FROM products WHERE brandSlug=? LIMIT 1').get(brandSlug))) fail('Esta marca não possui produtos.', 409);
+      await db.prepare('UPDATE products SET onRequest=1 WHERE brandSlug=?').run(brandSlug);
+      return json(await catalog());
+    }
     const match = path.match(/^\/api\/admin\/(products|categories|consultants)(?:\/([\w-]+))?$/);
     if (!match) return json({ error: 'Não encontrado.' }, 404);
     const [, kind, id] = match;
