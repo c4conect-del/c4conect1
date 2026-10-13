@@ -275,3 +275,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .brand-pricing > div > strong { font-size: 12px; color: #dce1c3; }
 .brand-pricing > div > p { font-size: 11px; color: #939aa2; margin-top: 4px; }
 .bulk-price-button { display: flex; width: 100%; align-items: center; justify-content: center; gap: 7px; margin-top: 12px; color: var(--primary); }
+.admin-tabs { overflow-x: auto; }
+.admin-tabs button { min-width: 80px; padding: 0 9px; }
+.brand-monogram { display: grid; place-items: center; width: 85px; height: 85px; border-radius: 22px; background: #ffe70010; color: var(--primary); font-size: 28px; font-weight: 800; }
+.brand-admin-heading { display: flex; align-items: center; gap: 13px; }
+.brand-admin-heading img, .brand-admin-heading .brand-monogram { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; font-size: 20px; border-radius: 13px; }
+.brand-admin-actions { display: flex; gap: 8px; margin-top: 15px; }
+.brand-admin-actions button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; flex: 1; background: #ffffff06; border-radius: 11px; font-size: 12px; }
+.brand-admin-actions .delete-button { flex: 0 0 44px; color: #e19191; }
+.brand-active { color: #becd8e; }
+.admin-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; overflow: visible; }

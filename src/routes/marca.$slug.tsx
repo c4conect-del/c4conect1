@@ -1,16 +1,19 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { brands, useCatalog, CatalogStatus } from '@/data/catalog';
+import { useCatalog, CatalogStatus } from '@/data/catalog';
+import { BrandLogo } from '@/components/BrandLogo';
 import { ConsultantContact } from '@/components/ConsultantContact';
 import { ProductTable } from '@/components/ProductTable';
 import { ArrowLeft, Search, Check } from 'lucide-react';
-export const Route = createFileRoute('/marca/$slug')({ component: BrandPage, head: ({ params }) => ({ meta: [{ title: `${brands.find(b => b.slug === params.slug)?.name || 'Marca'} • C4 PHARMA` }] }) });
+export const Route = createFileRoute('/marca/$slug')({ component: BrandPage, head: () => ({ meta: [{ title: 'Marca • C4 PHARMA' }] }) });
 function BrandPage() {
   const { slug } = Route.useParams();
-  const { catalog, loading, error } = useCatalog();
+  const { catalog, brands, loading, error } = useCatalog();
   const brand = brands.find(b => b.slug === slug);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [category, setCategory] = useState('all'); const [query, setQuery] = useState('');
+  if (loading) return <main className="page-content"><CatalogStatus /></main>;
+  if (error) return <main className="page-content"><CatalogStatus /><Link to="/catalogo">Voltar para marcas</Link></main>;
   if (!brand) return <main className="page-content"><h1>Marca não encontrada</h1><Link to="/catalogo">Voltar para marcas</Link></main>;
   const products = catalog.products.filter(p => p.brandSlug === slug);
   const chosen = products.filter(p => selected.has(p.id));
@@ -21,7 +24,7 @@ function BrandPage() {
   return <div>
     <header className="app-header"><Link to="/catalogo" className="back-link"><ArrowLeft size={19}/> Marcas</Link><span className="eyebrow">C4 PHARMA</span></header>
     <main className="page-content brand-page">
-      <div className="brand-hero"><img src={brand.logo} alt={brand.name} width={110} height={110}/><span className="eyebrow">CATÁLOGO DA MARCA</span><h1>{brand.name}</h1><p>{products.length} produtos • Selecione para consultar</p></div>
+      <div className="brand-hero"><BrandLogo brand={brand} size={110}/><span className="eyebrow">CATÁLOGO DA MARCA</span><h1>{brand.name}</h1><p>{products.length} produtos • Selecione para consultar</p></div>
       <label className="search-field"><Search size={19}/><input aria-label="Buscar nesta marca" type="search" placeholder="Buscar nesta marca" value={query} onChange={e => setQuery(e.target.value)}/></label>
       <div className="category-tabs"><button className={category === 'all' ? 'active' : ''} onClick={() => setCategory('all')}>Todos</button>{categories.map(c => <button key={c.id} className={category === c.id ? 'active' : ''} onClick={() => setCategory(c.id)}>{c.name}</button>)}</div>
       <CatalogStatus />

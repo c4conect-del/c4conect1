@@ -19,12 +19,13 @@ O setup cria `data/admin.json` com token aleatório e hash scrypt da senha e sal
 ## Painel
 
 - Preços: marque “A consultar” na edição individual. Para aplicar em lote, filtre uma marca e use “Selecionar todos da marca” → “Aplicar A consultar”. A ação inclui todos os produtos da marca, independentemente dos filtros de categoria e busca; os preços numéricos são preservados para reativação individual.
+- Marcas: cadastrar, editar nome e logo por URL HTTPS, ativar/desativar e excluir quando não houver produtos vinculados. Marcas desativadas e seus produtos ficam ocultos no catálogo, na busca e no carrossel. Os produtos continuam disponíveis no admin para edição ou transferência. Os links da marca são mantidos ao renomear.
 - Produtos: criar, editar, excluir, filtrar por marca e categoria, pesquisar, ajustar nome, apresentação, preço ou valor sob consulta.
 - Consultores: adicionar, editar e excluir nome e WhatsApp com DDI e DDD. O contato original é importado uma vez. Com vários consultores, o catálogo permite escolher quem atenderá; sem contatos, o atendimento fica indisponível. O WhatsApp aceita formatação e é validado e normalizado no servidor; números duplicados são bloqueados.
 - Categorias: criar, renomear e excluir. A exclusão é bloqueada enquanto houver produtos vinculados; mova esses produtos primeiro.
 - As mudanças são gravadas em `data/catalog.sqlite` e passam a aparecer no catálogo e na busca. Os dados existentes são importados uma única vez, sem reintroduzir produtos excluídos ao reiniciar.
 - Acesso exige token e senha; as APIs verificam sessão em todas as operações. Cookie HttpOnly/SameSite Strict, validade de 8 horas, proteção de origem e CSRF. Cinco falhas bloqueiam tentativas por 15 minutos; há também limite global de 25 tentativas por janela.
-- Marcas mantêm as identidades e logos existentes. Categorias são os grupos de produtos dentro dessas marcas.
+- As marcas iniciais mantêm suas logos; novas marcas podem usar uma URL de imagem HTTPS ou as iniciais do nome. Categorias são os grupos de produtos dentro dessas marcas.
 
 ## Produção
 

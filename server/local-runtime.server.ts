@@ -1,3 +1,4 @@
+import { brandMigration } from './brand-migration.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -43,6 +44,9 @@ function credentials(): Credentials {
   const file = JSON.parse(readFileSync(resolve(dataDir, 'admin.json'), 'utf8')) as Credentials;
   return { token: process.env.C4_ADMIN_TOKEN || file.token, passwordHash: process.env.C4_ADMIN_PASSWORD_HASH || file.passwordHash, salt: process.env.C4_ADMIN_SALT || file.salt };
 }
+
+db.exec('BEGIN');
+try { db.exec(brandMigration); db.exec('COMMIT'); } catch (error) { db.exec('ROLLBACK'); throw error; }
 
 const storage: CatalogDatabase = {
   prepare(sql) {

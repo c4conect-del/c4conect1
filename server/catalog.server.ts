@@ -1,5 +1,4 @@
 import { randomBytes, randomUUID, createHash, scryptSync, timingSafeEqual } from 'node:crypto';
-import seed from './seed.json' with { type: 'json' };
 export type SQLRow = Record<string, string | number | null>;
 export type CatalogDatabase = { prepare(sql: string): {
   get(...values: (string | number | null)[]): Promise<SQLRow | undefined>;
@@ -17,8 +16,10 @@ const hash = (s: string) => createHash('sha256').update(s).digest('hex');
 function same(a: string, b: string) { return timingSafeEqual(Buffer.from(hash(a)), Buffer.from(hash(b))); }
 export function createCatalogHandler(db: CatalogDatabase, credentials: () => Credentials, publicOrigin?: string) {
 function fail(message: string, status = 400): never { throw Object.assign(new Error(message), { status }); }
-async function catalog() {
-  return { consultants: (await db.prepare('SELECT * FROM consultants ORDER BY rowid').all()), categories: (await db.prepare('SELECT * FROM categories ORDER BY rowid').all()), products: (await db.prepare('SELECT * FROM products ORDER BY rowid').all()).map(p => ({ ...p, onRequest: Boolean(p.onRequest) })) };
+async function catalog(admin = true) {
+  const brands = (await db.prepare(admin ? 'SELECT * FROM brands ORDER BY rowid' : 'SELECT * FROM brands WHERE active=1 ORDER BY rowid').all()).map(b => ({ ...b, active: Boolean(b.active) }));
+  const products = await db.prepare(admin ? 'SELECT * FROM products ORDER BY rowid' : 'SELECT products.* FROM products JOIN brands ON brands.slug=products.brandSlug WHERE brands.active=1 ORDER BY products.rowid').all();
+  return { brands, consultants: await db.prepare('SELECT * FROM consultants ORDER BY rowid').all(), categories: await db.prepare('SELECT * FROM categories ORDER BY rowid').all(), products: products.map(p => ({ ...p, onRequest: Boolean(p.onRequest) })) };
 }
 async function session(request: Request) {
   const cookie = request.headers.get('cookie')?.match(/(?:^|;\s*)c4_admin=([a-f0-9]{64})(?:;|$)/)?.[1];
@@ -51,7 +52,7 @@ return async function handleCatalogRequest(request: Request) {
   const json = (data: unknown, status = 200) => Response.json(data, { status, headers });
   try {
     const path = new URL(request.url).pathname.replace(/\/$/, '');
-    if (path === '/api/catalog' && request.method === 'GET') return json(await catalog());
+    if (path === '/api/catalog' && request.method === 'GET') return json(await catalog(false));
     if (path === '/api/admin/login' && request.method === 'POST') {
       checkOrigin(request);
       const input = await body(request);
@@ -86,22 +87,38 @@ return async function handleCatalogRequest(request: Request) {
     if (path === '/api/admin/products/consultation' && request.method === 'POST') {
       const input = await body(request);
       const brandSlug = text(input.brandSlug, 'Marca');
-      if (!seed.some(brand => brand.slug === brandSlug)) fail('Selecione uma marca válida.');
+      if (!(await db.prepare('SELECT id FROM brands WHERE slug=?').get(brandSlug))) fail('Selecione uma marca válida.');
       if (!(await db.prepare('SELECT id FROM products WHERE brandSlug=? LIMIT 1').get(brandSlug))) fail('Esta marca não possui produtos.', 409);
       await db.prepare('UPDATE products SET onRequest=1 WHERE brandSlug=?').run(brandSlug);
       return json(await catalog());
     }
-    const match = path.match(/^\/api\/admin\/(products|categories|consultants)(?:\/([\w-]+))?$/);
+    const match = path.match(/^\/api\/admin\/(products|categories|consultants|brands)(?:\/([\w-]+))?$/);
     if (!match) return json({ error: 'Não encontrado.' }, 404);
     const [, kind, id] = match;
     if (!['POST','PUT','DELETE'].includes(request.method) || (request.method === 'POST' ? Boolean(id) : !id)) fail('Operação inválida.', 405);
     if (id && !(await db.prepare(`SELECT id FROM ${kind} WHERE id=?`).get(id))) fail('Registro não encontrado.', 404);
     if (request.method === 'DELETE') {
+      if (kind === 'brands') {
+        const brand = await db.prepare('SELECT slug FROM brands WHERE id=?').get(id!);
+        if (await db.prepare('SELECT id FROM products WHERE brandSlug=? LIMIT 1').get(String(brand!.slug))) fail('Mova ou exclua os produtos desta marca antes de excluí-la.', 409);
+      }
       if (kind === 'categories' && (await db.prepare('SELECT id FROM products WHERE categoryId=? LIMIT 1').get(id!))) fail('Mova ou exclua os produtos desta categoria antes de excluí-la.', 409);
       (await db.prepare(`DELETE FROM ${kind} WHERE id=?`).run(id!)); return json(await catalog());
     }
     const input = await body(request); const name = text(input.name, 'Nome');
-    if (kind === 'consultants') {
+    if (kind === 'brands') {
+      if (typeof input.active !== 'boolean') fail('Status da marca inválido.');
+      if (typeof input.logoUrl !== 'string' || input.logoUrl.length > 2048) fail('URL da logo inválida.');
+      const logoUrl = input.logoUrl.trim();
+      if (logoUrl) { try { const url = new URL(logoUrl); if (url.protocol !== 'https:' || url.username || url.password) fail('Use uma URL HTTPS para a logo.'); } catch { fail('Use uma URL HTTPS válida para a logo.'); } }
+      if (await db.prepare('SELECT id FROM brands WHERE lower(name)=lower(?) AND id<>?').get(name, id || '')) fail('Já existe uma marca com este nome.', 409);
+      if (id) await db.prepare('UPDATE brands SET name=?, logoUrl=?, active=? WHERE id=?').run(name, logoUrl, input.active ? 1 : 0, id);
+      else {
+        let slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 96).replace(/-$/g, '') || 'marca';
+        if (await db.prepare('SELECT id FROM brands WHERE slug=?').get(slug)) slug += '-' + randomUUID().slice(0, 8);
+        await db.prepare('INSERT INTO brands VALUES (?,?,?,?,?,?)').run(randomUUID(), slug, name, logoUrl, '', input.active ? 1 : 0);
+      }
+    } else if (kind === 'consultants') {
       const rawPhone = text(input.phone, 'WhatsApp', 32);
       if (!/^\+?[\d\s().-]+$/.test(rawPhone)) fail('WhatsApp inválido. Use DDI, DDD e número.');
       const phone = rawPhone.replace(/\D/g, '');
@@ -115,7 +132,7 @@ return async function handleCatalogRequest(request: Request) {
       else (await db.prepare('INSERT INTO categories VALUES (?,?)').run(randomUUID(), name));
     } else {
       const brandSlug = text(input.brandSlug, 'Marca'); const categoryId = text(input.categoryId, 'Categoria');
-      if (!seed.some(b => b.slug === brandSlug) || !(await db.prepare('SELECT id FROM categories WHERE id=?').get(categoryId))) fail('Marca ou categoria inexistente.');
+      if (!(await db.prepare('SELECT id FROM brands WHERE slug=?').get(brandSlug)) || !(await db.prepare('SELECT id FROM categories WHERE id=?').get(categoryId))) fail('Marca ou categoria inexistente.');
       if (typeof input.dosage !== 'string' || input.dosage.length > 160) fail('Dosagem inválida.');
       if (typeof input.price !== 'number' || !Number.isFinite(input.price) || input.price < 0 || input.price > 999999.99) fail('Preço inválido.');
       if (typeof input.onRequest !== 'boolean') fail('Tipo de preço inválido.');

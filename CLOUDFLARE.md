@@ -10,15 +10,14 @@ A publicação usa o Worker `c4conect1` e o banco D1 `c4conect1-catalog`, vincul
 
 ```sh
 npm ci
-npm run build
-npx wrangler deploy --config dist/server/wrangler.json
+npm run deploy
 ```
 
 Os secrets existentes são preservados nos próximos deploys. Não publique `data/`, arquivos de acesso privado nem arquivos `.dev.vars`.
 
 ## Configurar um banco pela primeira vez
 
-Use uma conta Cloudflare autenticada com `npx wrangler login`. Configure o ID do banco e da conta em `wrangler.jsonc`. As tabelas são criadas com:
+Use uma conta Cloudflare autenticada com `npx wrangler login`. Configure o ID do banco e da conta em `wrangler.jsonc`. As tabelas são criadas e atualizadas com:
 
 ```sh
 npm run cf:migrate

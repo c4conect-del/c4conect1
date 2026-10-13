@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { brands, useCatalog } from "@/data/catalog";
+import { useCatalog } from "@/data/catalog";
 
 interface SearchResult {
   productName: string;
@@ -12,7 +12,7 @@ interface SearchResult {
 }
 
 export function ProductSearch() {
-  const { catalog } = useCatalog();
+  const { catalog, brands } = useCatalog();
   const allProducts: SearchResult[] = catalog.products.map(p => ({ productName: p.name, dosage: p.dosage, brandName: brands.find(b => b.slug === p.brandSlug)?.name || p.brandSlug, brandSlug: p.brandSlug, type: catalog.categories.find(c => c.id === p.categoryId)?.name || "" }));
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);

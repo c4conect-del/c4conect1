@@ -3,7 +3,7 @@ import { ConsultantContact } from '@/components/ConsultantContact';
 import { BrandCard } from '@/components/BrandCard';
 import { ProductSearch } from '@/components/ProductSearch';
 import { FreightChecker } from '@/components/FreightChecker';
-import { brands, useCatalog, CatalogStatus } from '@/data/catalog';
+import { useCatalog, CatalogStatus } from '@/data/catalog';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import logo from '@/assets/c4-pharma.png';
 export const Route = createFileRoute('/catalogo')({
@@ -11,7 +11,7 @@ export const Route = createFileRoute('/catalogo')({
   component: CatalogoPage,
 });
 function CatalogoPage() {
-  const { catalog } = useCatalog();
+  const { catalog, brands, loading, error } = useCatalog();
   return <div className="catalog-page">
     <header className="app-header"><Link to="/" className="icon-button" aria-label="Voltar ao início"><ArrowLeft size={20} /></Link><span>C4 <b>PHARMA</b></span><span className="live-dot">CATÁLOGO</span></header>
     <main className="page-content">
@@ -19,6 +19,7 @@ function CatalogoPage() {
       <ProductSearch />
       <CatalogStatus />
       <div className="section-heading"><div><span className="eyebrow">MULTIMARCA</span><h2>Escolha sua marca</h2></div><span>{brands.length} marcas <ArrowUpRight size={14}/></span></div>
+      {!loading && !error && !brands.length && <p className="status-box">Nenhuma marca disponível no momento.</p>}
       <div className="brand-grid">{brands.map((brand, i) => <BrandCard key={brand.slug} brand={brand} index={i} count={catalog.products.filter(p => p.brandSlug === brand.slug).length} />)}</div>
       <div className="freight-section"><FreightChecker /></div>
       <div className="catalog-footer"><span className="eyebrow">C4 PHARMA</span><p>Uma experiência feita para você.</p></div>

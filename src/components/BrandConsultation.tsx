@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { CheckCheck, X } from 'lucide-react';
-import { brands, type CatalogProduct } from '@/data/catalog';
+import { type CatalogProduct, type CatalogBrand } from '@/data/catalog';
 
-export function BrandConsultation({ brandSlug, products, busy, error, onMutate }: {
+export function BrandConsultation({ brands, brandSlug, products, busy, error, onMutate }: {
+  brands: CatalogBrand[];
   brandSlug: string;
   products: CatalogProduct[];
   busy: boolean;
