@@ -1,6 +1,6 @@
 import "@tanstack/react-start";
 import { createFileRoute } from '@tanstack/react-router';
-import { handleCatalogRequest } from '../../../server/catalog.server';
+import { handleCatalogRequest } from 'c4-runtime';
 
 export const Route = createFileRoute('/api/$')({
   server: {

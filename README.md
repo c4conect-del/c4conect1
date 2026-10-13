@@ -206,7 +206,7 @@ IMPORTANTE:
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://c4-pharma-prime.lovable.app
+**Live app**: https://c4conect1.c4conect1.workers.dev
 
 ## Build with Lovable
 
@@ -229,4 +229,4 @@ npm run dev
 
 ## Administração e versão mobile
 
-A versão atual inclui catálogo persistente e painel privado. Consulte [ADMIN-README.md](./ADMIN-README.md) para configuração, acesso, backup e execução em produção. Esta versão exige um servidor Node.js com armazenamento persistente para SQLite.
+A versão atual inclui catálogo persistente e painel privado. Consulte [ADMIN-README.md](./ADMIN-README.md) para configuração, acesso, backup e execução em produção. A publicação usa Cloudflare Workers e D1; veja [CLOUDFLARE.md](./CLOUDFLARE.md). O desenvolvimento local mantém SQLite.

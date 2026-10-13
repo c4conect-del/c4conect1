@@ -27,10 +27,12 @@ O setup cria `data/admin.json` com token aleatório e hash scrypt da senha e sal
 
 ## Produção
 
-Este backend usa **Node.js com disco persistente**, não hospedagem estática nem o runtime Cloudflare Workers. O build do projeto foi configurado para o servidor Node do Nitro.
+A publicação padrão usa **Cloudflare Workers + D1**. Consulte [CLOUDFLARE.md](./CLOUDFLARE.md) para deploy, migração e secrets. O banco SQLite em disco é usado no desenvolvimento local.
+
+Para uma instalação alternativa em **Node.js com disco persistente**, use o build específico abaixo.
 
 ```sh
-npm run build
+npm run build:node
 npm run admin:setup
 C4_PUBLIC_ORIGIN=https://seu-dominio.com PORT=3000 npm start
 ```

@@ -9,7 +9,7 @@ const dir = mkdtempSync(join(tmpdir(), 'c4-test-'));
 process.env.C4_DATA_DIR = dir;
 const salt = 'test-salt'; const token = 'test-private-token'; const password = 'test-password';
 writeFileSync(join(dir, 'admin.json'), JSON.stringify({ token, salt, passwordHash: scryptSync(password, salt, 64).toString('hex') }));
-const { handleCatalogRequest } = await import('./catalog.server.ts');
+const { handleCatalogRequest } = await import('./local-runtime.server.ts');
 let cookie = ''; let csrf = '';
 async function req(path: string, method = 'GET', body?: unknown, extra: Record<string,string> = {}, auth = true) {
   return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined }));
@@ -59,7 +59,7 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     for (const c of contacts) assert.equal((await req(`admin/consultants/${c.id}`, 'DELETE')).status, 200);
     assert.equal((await (await req('catalog')).json()).consultants.length, 0);
     // Re-open the database through a fresh module to ensure the migration never restores deleted contacts.
-    const reopened = await import('./catalog.server.ts?restart-test');
+    const reopened = await import('./local-runtime.server.ts?restart-test');
     assert.equal((await (await reopened.handleCatalogRequest(new Request('http://localhost:8081/api/catalog'))).json()).consultants.length, 0);
     assert.equal((await req('admin/logout', 'POST')).status, 200);
     assert.equal((await req('admin/session')).status, 401);

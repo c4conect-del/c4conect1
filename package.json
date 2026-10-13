@@ -1,5 +1,5 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "c4conect1",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -12,7 +12,12 @@
     "admin:setup": "node scripts/setup-admin.mjs",
     "admin:rotate": "node scripts/setup-admin.mjs --rotate",
     "start": "node dist/server/index.mjs",
-    "test:admin": "node --experimental-strip-types --test server/catalog.test.ts"
+    "test:admin": "node --experimental-strip-types --test server/catalog.test.ts",
+    "build:node": "C4_BUILD_TARGET=node vite build",
+    "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
+    "cf:preview": "wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/state",
+    "cf:export": "node scripts/export-cloudflare.mjs",
+    "cf:migrate": "wrangler d1 migrations apply DB --remote --config wrangler.jsonc"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
@@ -82,7 +87,8 @@
     "globals": "^15.15.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "wrangler": "^4.150.0"
   },
   "engines": {
     "node": ">=22.16.0"

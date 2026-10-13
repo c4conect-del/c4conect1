@@ -1,7 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
-  "compatibility_date": "2025-09-24",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry"
+  "name": "c4conect1",
+  "compatibility_date": "2026-10-13",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "dist/server/index.mjs",
+  "assets": {
+    "directory": "dist/client",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "c4conect1-catalog",
+      "database_id": "5747db59-51b9-43df-a7cc-1b1325318a1f",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "account_id": "7ec999341c00c1cfdc7e1801a7dbc9b6"
 }
