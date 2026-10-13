@@ -1,0 +1,74 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { scryptSync } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
+const dir = mkdtempSync(join(tmpdir(), 'c4-test-'));
+process.env.C4_DATA_DIR = dir;
+const salt = 'test-salt'; const token = 'test-private-token'; const password = 'test-password';
+writeFileSync(join(dir, 'admin.json'), JSON.stringify({ token, salt, passwordHash: scryptSync(password, salt, 64).toString('hex') }));
+const { handleCatalogRequest } = await import('./catalog.server.ts');
+let cookie = ''; let csrf = '';
+async function req(path: string, method = 'GET', body?: unknown, extra: Record<string,string> = {}, auth = true) {
+  return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined }));
+}
+test('server authentication, CRUD, persistence, category integrity, expiry and limits', async () => {
+  try {
+    assert.equal((await req('admin/session')).status, 401);
+    assert.equal((await req('admin/products', 'POST', { name: 'blocked' })).status, 401);
+    assert.equal((await req('admin/consultants', 'POST', { name: 'blocked', phone: '5511999990000' })).status, 401);
+    assert.equal((await req('admin/login', 'POST', { token: 'wrong', password })).status, 401);
+    assert.equal((await req('admin/login', 'POST', { token, password: 'wrong' })).status, 401);
+    assert.equal((await req('admin/login', 'POST', { token, password }, { Origin: 'https://evil.example' })).status, 403);
+    const login = await req('admin/login', 'POST', { token, password }); assert.equal(login.status, 200);
+    const data = await login.json(); csrf = data.csrf; cookie = login.headers.get('set-cookie')!.split(';')[0];
+    assert.match(login.headers.get('set-cookie')!, /HttpOnly; SameSite=Strict/);
+    assert.ok(data.products.length > 100);
+    assert.equal((await req('admin/categories', 'POST', { name: 'Test' }, { 'X-CSRF-Token': '' })).status, 403);
+    assert.equal((await req('admin/categories', 'POST', { name: 'Test' }, { Origin: 'https://evil.example' })).status, 403);
+    let response = await req('admin/categories', 'POST', { name: 'Test' }); assert.equal(response.status, 200);
+    const cat = (await response.json()).categories.find((c: { name: string }) => c.name === 'Test');
+    assert.equal((await req('admin/categories', 'POST', { name: 'test' })).status, 409);
+    const p = { name: 'QA Product', dosage: '10ml', price: 123.45, brandSlug: 'gold-premium', categoryId: cat.id, onRequest: false };
+    assert.equal((await req('admin/products', 'POST', { ...p, price: -1 })).status, 400);
+    response = await req('admin/products', 'POST', p); assert.equal(response.status, 200);
+    const product = (await response.json()).products.find((p: { name: string }) => p.name === 'QA Product');
+    assert.equal((await req(`admin/categories/${cat.id}`, 'DELETE')).status, 409);
+    assert.equal((await req(`admin/products/${product.id}`, 'PUT', { ...p, name: 'QA Edited', price: 88, onRequest: true })).status, 200);
+    assert.equal((await req(`admin/categories/${cat.id}`, 'PUT', { name: 'Renamed' })).status, 200);
+    const db = new DatabaseSync(join(dir, 'catalog.sqlite'));
+    assert.equal(db.prepare('SELECT name FROM products WHERE id=?').get(product.id)?.name, 'QA Edited');
+    const publicData = await (await req('catalog')).json();
+    assert.equal(publicData.products.find((p: { id: string }) => p.id === product.id).price, 88);
+    assert.equal((await req(`admin/products/${product.id}`, 'DELETE')).status, 200);
+    assert.equal((await req(`admin/categories/${cat.id}`, 'DELETE')).status, 200);
+    assert.equal((await req('admin/consultants', 'POST', { name: 'QA Consultant', phone: '123' })).status, 400);
+    assert.equal((await req('admin/consultants', 'POST', { name: 'QA Consultant', phone: 'https://evil.example' })).status, 400);
+    assert.equal((await req('admin/consultants', 'POST', { name: 'QA Consultant', phone: '5511999990000' }, { 'X-CSRF-Token': '' })).status, 403);
+    response = await req('admin/consultants', 'POST', { name: 'QA Consultant', phone: '+55 (11) 99999-0000' });
+    assert.equal(response.status, 200);
+    const contact = (await response.json()).consultants.find((c: { name: string }) => c.name === 'QA Consultant');
+    assert.equal(contact.phone, '5511999990000');
+    assert.equal((await req('admin/consultants', 'POST', { name: 'Duplicate', phone: contact.phone })).status, 409);
+    assert.equal((await req(`admin/consultants/${contact.id}`, 'PUT', { name: 'Edited Consultant', phone: '+55 (11) 99999-0001' })).status, 200);
+    assert.equal(db.prepare('SELECT phone FROM consultants WHERE id=?').get(contact.id)?.phone, '5511999990001');
+    const contacts = (await (await req('catalog')).json()).consultants;
+    assert.equal(contacts.find((c: { id: string }) => c.id === contact.id).name, 'Edited Consultant');
+    for (const c of contacts) assert.equal((await req(`admin/consultants/${c.id}`, 'DELETE')).status, 200);
+    assert.equal((await (await req('catalog')).json()).consultants.length, 0);
+    // Re-open the database through a fresh module to ensure the migration never restores deleted contacts.
+    const reopened = await import('./catalog.server.ts?restart-test');
+    assert.equal((await (await reopened.handleCatalogRequest(new Request('http://localhost:8081/api/catalog'))).json()).consultants.length, 0);
+    assert.equal((await req('admin/logout', 'POST')).status, 200);
+    assert.equal((await req('admin/session')).status, 401);
+    const relogin = await req('admin/login', 'POST', { token, password }); assert.equal(relogin.status, 200);
+    cookie = relogin.headers.get('set-cookie')!.split(';')[0];
+    db.exec('UPDATE sessions SET expires=0');
+    assert.equal((await req('admin/session')).status, 401);
+    for (let i = 0; i < 5; i++) assert.equal((await req('admin/login', 'POST', { token, password: 'bad' })).status, 401);
+    assert.equal((await req('admin/login', 'POST', { token, password })).status, 429);
+    db.close();
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

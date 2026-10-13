@@ -1,0 +1,786 @@
+[
+  {
+    "slug": "gold-premium",
+    "name": "Gold Premium Series",
+    "injetaveis": [
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 230
+      },
+      {
+        "name": "Durateston",
+        "dosage": "250mg 10ml",
+        "price": 235
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "200mg 10ml",
+        "price": 230
+      },
+      {
+        "name": "Deca",
+        "dosage": "250ml 10ml",
+        "price": 230
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg 10ml",
+        "price": 230
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "10ml",
+        "price": 230
+      },
+      {
+        "name": "Trembo Acetato",
+        "dosage": "100mg 10ml",
+        "price": 260
+      },
+      {
+        "name": "Trembo Enantato",
+        "dosage": "200mg 10ml",
+        "price": 260
+      },
+      {
+        "name": "Trembo Hexa",
+        "dosage": "50mg 10ml",
+        "price": 260
+      },
+      {
+        "name": "Tri Trembo",
+        "dosage": "200mg 10ml",
+        "price": 310
+      },
+      {
+        "name": "HCG",
+        "dosage": "5000 UI",
+        "price": 300
+      }
+    ],
+    "orais": []
+  },
+  {
+    "slug": "landerlan",
+    "name": "Landerlan",
+    "injetaveis": [
+      {
+        "name": "Enantato",
+        "dosage": "250mg 4ml",
+        "price": 125
+      },
+      {
+        "name": "Durateston",
+        "dosage": "250mg 1ml",
+        "price": 50
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "6ml",
+        "price": 80
+      },
+      {
+        "name": "Propionato",
+        "dosage": "10ml",
+        "price": 180
+      },
+      {
+        "name": "Deca",
+        "dosage": "200mg 5ml",
+        "price": 125
+      },
+      {
+        "name": "Primobolan",
+        "dosage": "100mg 10ml",
+        "price": 480
+      },
+      {
+        "name": "Stano Aquoso",
+        "dosage": "50mg 15ml",
+        "price": 125
+      },
+      {
+        "name": "Stano Aquoso",
+        "dosage": "50mg 30ml",
+        "price": 205
+      }
+    ],
+    "orais": [
+      {
+        "name": "Oxandrolona",
+        "dosage": "5mg 100 caps",
+        "price": 325
+      },
+      {
+        "name": "Oxandrolona",
+        "dosage": "10mg 50 caps",
+        "price": 315
+      },
+      {
+        "name": "Diana",
+        "dosage": "10mg",
+        "price": 135
+      },
+      {
+        "name": "Stano",
+        "dosage": "10mg",
+        "price": 135
+      },
+      {
+        "name": "Hemogenin",
+        "dosage": "50mg 20 caps",
+        "price": 135
+      },
+      {
+        "name": "Proviron",
+        "dosage": "25mg 20 caps",
+        "price": 190
+      },
+      {
+        "name": "Superdrol",
+        "dosage": "10mg 50 caps",
+        "price": 225
+      },
+      {
+        "name": "Primobolan Oral",
+        "dosage": "25mg 30 caps",
+        "price": 520
+      }
+    ]
+  },
+  {
+    "slug": "zphc",
+    "name": "ZPHC",
+    "injetaveis": [
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 325
+      },
+      {
+        "name": "Sustanon",
+        "dosage": "250mg 10ml",
+        "price": 390
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "250mg 10ml",
+        "price": 330
+      },
+      {
+        "name": "Propionato",
+        "dosage": "100mg 10ml",
+        "price": 320
+      },
+      {
+        "name": "Deca",
+        "dosage": "250mg 10ml",
+        "price": 390
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg 10ml",
+        "price": 390
+      },
+      {
+        "name": "Masteron",
+        "dosage": "100mg 10ml",
+        "price": 580
+      },
+      {
+        "name": "Masteron",
+        "dosage": "200mg 10ml",
+        "price": 595
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "250mg 10ml",
+        "price": 270
+      },
+      {
+        "name": "Trembolona Acetato",
+        "dosage": "100mg 10ml",
+        "price": 420
+      },
+      {
+        "name": "Primobolan",
+        "dosage": "10ml",
+        "price": 690
+      },
+      {
+        "name": "Stano",
+        "dosage": "50mg 10ml",
+        "price": 250
+      },
+      {
+        "name": "DHB",
+        "dosage": "50mg",
+        "price": 500
+      },
+      {
+        "name": "MENT",
+        "dosage": "25mg",
+        "price": 650
+      },
+      {
+        "name": "MENT",
+        "dosage": "50mg",
+        "price": 800
+      },
+      {
+        "name": "Diana Inj.",
+        "dosage": "50mg",
+        "price": 260
+      },
+      {
+        "name": "HCG",
+        "dosage": "5000 UI",
+        "price": 400
+      }
+    ],
+    "orais": [
+      {
+        "name": "Oxandrolona",
+        "dosage": "10mg 100 caps",
+        "price": 390
+      },
+      {
+        "name": "Dianabol",
+        "dosage": "10mg 100 caps",
+        "price": 185
+      },
+      {
+        "name": "Hemogenin",
+        "dosage": "25mg 100 caps",
+        "price": 380
+      },
+      {
+        "name": "Stano Oral",
+        "dosage": "10mg 100 caps",
+        "price": 260
+      },
+      {
+        "name": "Turinabol",
+        "dosage": "10mg",
+        "price": 498
+      },
+      {
+        "name": "Proviron",
+        "dosage": "50 caps",
+        "price": 500
+      },
+      {
+        "name": "Clomid",
+        "dosage": "25mg 100 caps",
+        "price": 380
+      },
+      {
+        "name": "T3",
+        "dosage": "50mcg 50 caps",
+        "price": 400
+      },
+      {
+        "name": "Anastrozol",
+        "dosage": "1mg 50 caps",
+        "price": 290
+      }
+    ]
+  },
+  {
+    "slug": "cooper-pharma",
+    "name": "Cooper Pharma",
+    "injetaveis": [
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 385
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "250mg 10ml",
+        "price": 385
+      },
+      {
+        "name": "Durateston",
+        "dosage": "250mg 10ml",
+        "price": 430
+      },
+      {
+        "name": "Propionato",
+        "dosage": "100mg 10ml",
+        "price": 385
+      },
+      {
+        "name": "Deca",
+        "dosage": "250mg 10ml",
+        "price": 470
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg 10ml",
+        "price": 450
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "250mg 10ml",
+        "price": 550
+      },
+      {
+        "name": "Trembolona Acetato",
+        "dosage": "100mg 5ml",
+        "price": 375
+      },
+      {
+        "name": "Trembolona Enantato",
+        "dosage": "200mg 5ml",
+        "price": 555
+      },
+      {
+        "name": "Trembolona Hexa",
+        "dosage": "76.5mg 5ml",
+        "price": 470
+      },
+      {
+        "name": "Primobolan",
+        "dosage": "100mg 10ml",
+        "price": 1200
+      },
+      {
+        "name": "Masteron",
+        "dosage": "100mg 10ml",
+        "price": 620
+      },
+      {
+        "name": "Masteron Enan",
+        "dosage": "200mg 10ml",
+        "price": 640
+      },
+      {
+        "name": "Stano",
+        "dosage": "50mg 10ml",
+        "price": 360
+      }
+    ],
+    "orais": [
+      {
+        "name": "Oxandrolona",
+        "dosage": "10mg 50 caps",
+        "price": 330
+      },
+      {
+        "name": "Diana",
+        "dosage": "10mg 50 caps",
+        "price": 210
+      },
+      {
+        "name": "Stano",
+        "dosage": "10mg 50 caps",
+        "price": 220
+      },
+      {
+        "name": "Hemogenin",
+        "dosage": "50mg 50 caps",
+        "price": 385
+      },
+      {
+        "name": "Primobolan Oral",
+        "dosage": "25mg 50 caps",
+        "price": 1300
+      },
+      {
+        "name": "Proviron",
+        "dosage": "25mg 50 caps",
+        "price": 415
+      },
+      {
+        "name": "Turinabol",
+        "dosage": "10mg 50 caps",
+        "price": 350
+      },
+      {
+        "name": "T3",
+        "dosage": "50mcg 50 caps",
+        "price": 400
+      },
+      {
+        "name": "Clembuterol",
+        "dosage": "40mcg 50 caps",
+        "price": 220
+      },
+      {
+        "name": "Clomid",
+        "dosage": "50mg 50 caps",
+        "price": 245
+      },
+      {
+        "name": "Tamoxifeno",
+        "dosage": "20mg 30 caps",
+        "price": 260
+      },
+      {
+        "name": "Halotestin",
+        "dosage": "10mg 50 caps",
+        "price": 490
+      },
+      {
+        "name": "MK677",
+        "dosage": "",
+        "price": 450
+      },
+      {
+        "name": "Cardarine",
+        "dosage": "",
+        "price": 370
+      },
+      {
+        "name": "Ligandrol",
+        "dosage": "",
+        "price": 450
+      },
+      {
+        "name": "Ostarine",
+        "dosage": "",
+        "price": 375
+      },
+      {
+        "name": "Exemestano",
+        "dosage": "25mg 50 caps",
+        "price": 510
+      }
+    ]
+  },
+  {
+    "slug": "canada-labs",
+    "name": "Canada Labs",
+    "injetaveis": [
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 330
+      },
+      {
+        "name": "Durateston",
+        "dosage": "250mg 10ml",
+        "price": 350
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "200mg 10ml",
+        "price": 320
+      },
+      {
+        "name": "Propionato",
+        "dosage": "100mg 10ml",
+        "price": 310
+      },
+      {
+        "name": "Testo Aquosa",
+        "dosage": "100mg 10ml",
+        "price": 280
+      },
+      {
+        "name": "Deca",
+        "dosage": "250mg 10ml",
+        "price": 400
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg 10ml",
+        "price": 300
+      },
+      {
+        "name": "Masteron",
+        "dosage": "100mg 10ml",
+        "price": 590
+      },
+      {
+        "name": "Masteron Enantato",
+        "dosage": "200mg 10ml",
+        "price": 620
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "200mg 10ml",
+        "price": 280
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "300mg 10ml",
+        "price": 320
+      },
+      {
+        "name": "Trembolona Acetato",
+        "dosage": "100mg 10ml",
+        "price": 400
+      },
+      {
+        "name": "Trembolona Enantato",
+        "dosage": "100mg 10ml",
+        "price": 540
+      },
+      {
+        "name": "Trembo Hexa",
+        "dosage": "75mg 10ml",
+        "price": 500
+      },
+      {
+        "name": "Stano Injetável",
+        "dosage": "50mg 10ml",
+        "price": 230
+      },
+      {
+        "name": "Hemo Injetável",
+        "dosage": "50mg 10ml",
+        "price": 265
+      }
+    ],
+    "orais": []
+  },
+  {
+    "slug": "alpha-pharma",
+    "name": "Alpha Pharma",
+    "injetaveis": [
+      {
+        "name": "Durateston",
+        "dosage": "250mg 10ml",
+        "price": 495
+      },
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 495
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "250mg 10ml",
+        "price": 495
+      },
+      {
+        "name": "Testosterona Base",
+        "dosage": "10ml",
+        "price": 420
+      },
+      {
+        "name": "Propionato",
+        "dosage": "100mg 10ml",
+        "price": 855
+      },
+      {
+        "name": "Nebido",
+        "dosage": "1000mg 4ml",
+        "price": 620
+      },
+      {
+        "name": "Deca",
+        "dosage": "250mg 10ml",
+        "price": 570
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg",
+        "price": 675
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "250mg 10ml",
+        "price": 540
+      },
+      {
+        "name": "Trembolona Acetato",
+        "dosage": "100mg 10ml",
+        "price": 835
+      },
+      {
+        "name": "Trembolona Enantato",
+        "dosage": "250mg 10ml",
+        "price": 1285
+      },
+      {
+        "name": "Trembolona Hexa",
+        "dosage": "76.5mg 7.5ml",
+        "price": 680
+      },
+      {
+        "name": "Masteron",
+        "dosage": "100mg 10ml",
+        "price": 985
+      },
+      {
+        "name": "Primobolan",
+        "dosage": "100mg 10ml",
+        "price": 1200
+      },
+      {
+        "name": "Stano",
+        "dosage": "50mg 100ml",
+        "price": 555
+      }
+    ],
+    "orais": [
+      {
+        "name": "Oxandrolona",
+        "dosage": "10mg 50 caps",
+        "price": 710
+      },
+      {
+        "name": "Dianabol",
+        "dosage": "10mg 50 caps",
+        "price": 290
+      },
+      {
+        "name": "Stano",
+        "dosage": "10mg 50 caps",
+        "price": 290
+      },
+      {
+        "name": "Hemogenin",
+        "dosage": "50mg 50 caps",
+        "price": 575
+      },
+      {
+        "name": "Superdrol",
+        "dosage": "10mg 50 caps",
+        "price": 675
+      },
+      {
+        "name": "Turinabol",
+        "dosage": "10mg",
+        "price": 560
+      },
+      {
+        "name": "Proviron",
+        "dosage": "25mg 50 caps",
+        "price": 420
+      },
+      {
+        "name": "Halotestin",
+        "dosage": "5mg 50 caps",
+        "price": 790
+      },
+      {
+        "name": "T3",
+        "dosage": "25mcg 30 caps",
+        "price": 280
+      },
+      {
+        "name": "Clomid",
+        "dosage": "50mg 50 caps",
+        "price": 290
+      },
+      {
+        "name": "Tadalafil",
+        "dosage": "20mg 100 caps",
+        "price": 280
+      },
+      {
+        "name": "Exemestano",
+        "dosage": "25mg 30 caps",
+        "price": 540
+      }
+    ]
+  },
+  {
+    "slug": "pharmacom",
+    "name": "Pharmacom Labs",
+    "injetaveis": [
+      {
+        "name": "Durateston",
+        "dosage": "250mg 10ml",
+        "price": 460
+      },
+      {
+        "name": "Enantato",
+        "dosage": "250mg 10ml",
+        "price": 450
+      },
+      {
+        "name": "Cipionato",
+        "dosage": "250mg 10ml",
+        "price": 445
+      },
+      {
+        "name": "Propionato",
+        "dosage": "100mg 10ml",
+        "price": 360
+      },
+      {
+        "name": "Deca",
+        "dosage": "300mg 10ml",
+        "price": 450
+      },
+      {
+        "name": "NPP",
+        "dosage": "100mg 10ml",
+        "price": 410
+      },
+      {
+        "name": "Boldenona",
+        "dosage": "300mg 10ml",
+        "price": 430
+      },
+      {
+        "name": "Masteron",
+        "dosage": "100mg 10ml",
+        "price": 630
+      },
+      {
+        "name": "Trembolona Acetato",
+        "dosage": "100mg 10ml",
+        "price": 575
+      },
+      {
+        "name": "Trembolona Enantato",
+        "dosage": "200mg 10ml",
+        "price": 1100
+      },
+      {
+        "name": "Primobolan",
+        "dosage": "100mg 10ml",
+        "price": 980
+      },
+      {
+        "name": "Stano",
+        "dosage": "50mg 10ml",
+        "price": 280
+      }
+    ],
+    "orais": [
+      {
+        "name": "Oxandrolona",
+        "dosage": "10mg 100 caps",
+        "price": 490
+      },
+      {
+        "name": "Stano Oral",
+        "dosage": "10mg 100 caps",
+        "price": 290
+      },
+      {
+        "name": "Diana",
+        "dosage": "10mg 100 caps",
+        "price": 290
+      },
+      {
+        "name": "Hemogenin",
+        "dosage": "25mg 100 caps",
+        "price": 560
+      },
+      {
+        "name": "Turinabol",
+        "dosage": "10mg 100 caps",
+        "price": 500
+      },
+      {
+        "name": "Clembuterol",
+        "dosage": "40mcg 100 caps",
+        "price": 395
+      },
+      {
+        "name": "Halotestin",
+        "dosage": "10mg 100 caps",
+        "price": 965
+      }
+    ]
+  }
+]
