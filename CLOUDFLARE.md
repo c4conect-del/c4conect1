@@ -4,7 +4,7 @@ Site: https://c4conect1.c4conect1.workers.dev
 
 O acesso privado do admin está em `ADMIN-ACCESS.local.md`.
 
-A publicação usa o Worker `c4conect1` e o banco D1 `c4conect1-catalog`, vinculados à conta configurada em `wrangler.jsonc`. O catálogo, produtos, categorias, consultores, sessões e limites de login são persistidos no D1. Em desenvolvimento, `npm run dev` mantém o banco SQLite local.
+A publicação usa o Worker `c4conect1` e o banco D1 `c4conect1-catalog`, vinculados à conta configurada em `wrangler.jsonc`. O catálogo, marcas, logos enviadas, produtos, categorias, consultores, sessões e limites de login são persistidos no D1. Em desenvolvimento, `npm run dev` mantém o banco SQLite local.
 
 ## Atualizar a publicação
 
@@ -30,7 +30,7 @@ npm run cf:export
 npx wrangler d1 execute DB --remote --config wrangler.jsonc --file data/cloudflare-import.sql
 ```
 
-A exportação preserva IDs e alterações locais de produtos, categorias e consultores. As sessões locais não são exportadas. Não repita a importação em um banco já preenchido: ela não é uma sincronização nem substituição de dados existentes.
+A exportação preserva IDs e alterações locais de marcas, logos, produtos, categorias e consultores. As sessões locais não são exportadas. Não repita a importação em um banco já preenchido: ela não é uma sincronização nem substituição de dados existentes.
 
 ## Configurar o acesso privado
 
@@ -58,3 +58,9 @@ Use a mesma pasta `.wrangler/state` para as migrações e a prévia do Worker. C
 `npm run test:admin` verifica a lógica compartilhada com um banco temporário. `npx tsc --noEmit` verifica os tipos. A autenticação e o CRUD também devem ser testados na prévia do Worker, que usa o runtime real do Cloudflare e D1 local.
 
 Para um servidor Node com disco persistente, continua disponível `npm run build:node` seguido de `npm start`. A publicação padrão de `npm run build` usa Cloudflare.
+
+## Logos por upload
+
+Em Marcas → Adicionar/Editar, envie um arquivo PNG, JPG ou WebP de até 1 MB. O formulário mostra uma prévia; salvar sem enviar outra imagem mantém a logo atual. Novos links externos não são aceitos.
+
+Os arquivos são armazenados em `brand_logos` no D1 (base64, fora do JSON do catálogo) e entregues por `/api/logos/<id>` com MIME validado, `nosniff` e cache por versão. A API verifica sessão, origem, CSRF, tamanho e assinatura do arquivo. Trocar a logo ou excluir a marca remove a imagem antiga do banco. As logos iniciais continuam como assets do projeto. Faça backup do banco inteiro para preservar as imagens junto com o catálogo.

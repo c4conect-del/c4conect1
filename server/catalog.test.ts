@@ -14,6 +14,11 @@ let cookie = ''; let csrf = '';
 async function req(path: string, method = 'GET', body?: unknown, extra: Record<string,string> = {}, auth = true) {
   return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined }));
 }
+const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1kAAAAASUVORK5CYII=', 'base64');
+async function upload(path: string, method: string, bytes = png, mime = 'image/png', extra: Record<string,string> = {}, auth = true) {
+  const form = new FormData(); form.set('name', 'Brand renamed'); form.set('active', 'false'); form.set('logo', new Blob([bytes], { type: mime }), 'logo.png');
+  return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: form }));
+}
 test('server authentication, CRUD, persistence, category integrity, expiry and limits', async () => {
   try {
     assert.equal((await req('admin/session')).status, 401);
@@ -87,7 +92,29 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     response = await req('admin/products', 'POST', newProduct); assert.equal(response.status, 200);
     const linkedProduct = (await response.json()).products.find((p: { name: string }) => p.name === 'Brand QA product');
     assert.equal((await req(`admin/brands/${newBrand.id}`, 'DELETE')).status, 409);
-    assert.equal((await req(`admin/brands/${newBrand.id}`, 'PUT', { name: 'Brand renamed', logoUrl: 'https://example.com/logo.png', active: false })).status, 200);
+    const brandPath = `admin/brands/${newBrand.id}`;
+    assert.equal((await req(brandPath, 'PUT', { name: 'Brand renamed', logoUrl: 'https://example.com/logo.png', active: false })).status, 400);
+    assert.equal((await upload(brandPath, 'PUT', png, 'image/png', {}, false)).status, 401);
+    assert.equal((await upload(brandPath, 'PUT', png, 'image/png', { 'X-CSRF-Token': '' })).status, 403);
+    assert.equal((await upload(brandPath, 'PUT', Buffer.from('<svg onload="alert(1)"/>'), 'image/png')).status, 415);
+    assert.equal((await upload(brandPath, 'PUT', png, 'image/jpeg')).status, 415);
+    assert.equal((await upload(brandPath, 'PUT', Buffer.alloc(1024 * 1024 + 1))).status, 413);
+    response = await upload(brandPath, 'PUT'); assert.equal(response.status, 200);
+    let savedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+    const firstLogo = savedBrand.logoUrl;
+    assert.match(firstLogo, /^\/api\/logos\/[a-f0-9-]{36}$/);
+    const imageResponse = await handleCatalogRequest(new Request(`http://localhost:8081${firstLogo}`));
+    assert.equal(imageResponse.status, 200); assert.equal(imageResponse.headers.get('content-type'), 'image/png');
+    assert.equal(imageResponse.headers.get('x-content-type-options'), 'nosniff');
+    assert.deepEqual(Buffer.from(await imageResponse.arrayBuffer()), png);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM brand_logos').get()?.count, 1);
+    response = await upload(brandPath, 'PUT'); assert.equal(response.status, 200);
+    savedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+    assert.notEqual(savedBrand.logoUrl, firstLogo);
+    assert.equal((await handleCatalogRequest(new Request(`http://localhost:8081${firstLogo}`))).status, 404);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM brand_logos').get()?.count, 1);
+    const afterUploadRestart = await import('./local-runtime.server.ts?logo-restart-test');
+    assert.equal((await afterUploadRestart.handleCatalogRequest(new Request(`http://localhost:8081${savedBrand.logoUrl}`))).status, 200);
     let publicCatalog = await (await req('catalog')).json();
     assert.ok(!publicCatalog.brands.some((b: { id: string }) => b.id === newBrand.id));
     assert.ok(!publicCatalog.products.some((p: { id: string }) => p.id === linkedProduct.id));
@@ -95,11 +122,19 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     assert.equal((await req(`admin/brands/${newBrand.id}`, 'PUT', { name: 'Brand renamed', logoUrl: '', active: true })).status, 200);
     publicCatalog = await (await req('catalog')).json();
     assert.ok(publicCatalog.brands.some((b: { id: string }) => b.id === newBrand.id));
+    assert.equal(publicCatalog.brands.find((b: { id: string }) => b.id === newBrand.id).logoUrl, savedBrand.logoUrl);
     assert.ok(publicCatalog.products.some((p: { id: string }) => p.id === linkedProduct.id));
     assert.equal(db.prepare('SELECT brandSlug FROM products WHERE id=?').get(linkedProduct.id)?.brandSlug, newBrand.slug);
     assert.equal((await req(`admin/products/${linkedProduct.id}`, 'DELETE')).status, 200);
     assert.equal((await req(`admin/brands/${newBrand.id}`, 'DELETE')).status, 200);
     assert.equal((await req('admin/products', 'POST', newProduct)).status, 400);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM brand_logos').get()?.count, 0);
+    assert.equal((await handleCatalogRequest(new Request(`http://localhost:8081${savedBrand.logoUrl}`))).status, 404);
+    response = await upload('admin/brands', 'POST'); assert.equal(response.status, 200);
+    const uploadedBrand = (await response.json()).brands.find((b: { name: string }) => b.name === 'Brand renamed');
+    assert.ok(uploadedBrand.logoUrl);
+    assert.equal((await req(`admin/brands/${uploadedBrand.id}`, 'DELETE')).status, 200);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM brand_logos').get()?.count, 0);
     assert.equal((await req('catalog')).status, 200);
     assert.equal((await req('admin/logout', 'POST')).status, 200);
     assert.equal((await req('admin/session')).status, 401);

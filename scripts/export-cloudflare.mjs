@@ -6,7 +6,7 @@ const dir = resolve(process.env.C4_DATA_DIR || 'data');
 const db = new DatabaseSync(resolve(dir, 'catalog.sqlite'), { readOnly: true });
 const quote = v => v === null ? 'NULL' : typeof v === 'number' ? String(v) : `'${String(v).replaceAll("'", "''")}'`;
 const lines = ['DELETE FROM brands;'];
-for (const table of ['brands', 'categories', 'products', 'consultants', 'metadata']) {
+for (const table of ['brands', 'brand_logos', 'categories', 'products', 'consultants', 'metadata']) {
   for (const row of db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()) {
     lines.push(`INSERT ${table === 'metadata' ? 'OR IGNORE ' : ''}INTO ${table} (${Object.keys(row).join(',')}) VALUES (${Object.values(row).map(quote).join(',')});`);
   }

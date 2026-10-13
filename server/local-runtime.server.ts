@@ -1,3 +1,4 @@
+import { logoMigration } from './logo-migration.ts';
 import { brandMigration } from './brand-migration.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
@@ -46,7 +47,7 @@ function credentials(): Credentials {
 }
 
 db.exec('BEGIN');
-try { db.exec(brandMigration); db.exec('COMMIT'); } catch (error) { db.exec('ROLLBACK'); throw error; }
+try { db.exec(brandMigration); db.exec(logoMigration); db.exec('COMMIT'); } catch (error) { db.exec('ROLLBACK'); throw error; }
 
 const storage: CatalogDatabase = {
   prepare(sql) {

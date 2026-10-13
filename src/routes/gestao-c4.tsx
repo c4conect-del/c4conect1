@@ -47,7 +47,7 @@ function AdminPage() {
     if (!session) return false;
     setBusy(true); setError(''); setNotice('');
     try {
-      const result = await api<Catalog>(path, { method, headers: { 'X-CSRF-Token': session.csrf }, body: data ? JSON.stringify(data) : undefined });
+      const result = await api<Catalog>(path, { method, headers: { 'X-CSRF-Token': session.csrf }, body: data instanceof FormData ? data : data ? JSON.stringify(data) : undefined });
       setSession(prev => prev ? { ...prev, ...result } : null); setEditor(null); setDeletion(null); setNotice('Alteração salva no catálogo.'); await refresh(); return true;
     } catch (e) { if (e instanceof ApiError && e.status === 401) { setSession(null); setHasToken(false); setEditor(null); setDeletion(null); } setError((e as Error).message); return false; }
     finally { setBusy(false); }

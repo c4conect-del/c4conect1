@@ -285,3 +285,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .brand-admin-actions .delete-button { flex: 0 0 44px; color: #e19191; }
 .brand-active { color: #becd8e; }
 .admin-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; overflow: visible; }
+
+.logo-upload { display: grid; gap: 10px; font-size: 13px; }
+.logo-upload-preview { display: flex; align-items: center; justify-content: center; min-height: 128px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,.03); overflow: hidden; }
+.logo-upload-preview img { width: 112px; height: 112px; object-fit: contain; }
+.editor-form .logo-upload-button { position: relative; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; overflow: hidden; }
+.editor-form .logo-upload-button input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; padding: 0; cursor: pointer; }
+.logo-upload-button:focus-within { outline: 2px solid #f4ec00; outline-offset: 3px; }
+.logo-upload small { color: #9a9c9b; line-height: 1.5; }
+.logo-filename { overflow-wrap: anywhere; }
