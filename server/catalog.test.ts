@@ -88,6 +88,17 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     response = await req('admin/brands', 'POST', { name: 'QA Brand', logoUrl: '', active: true }); assert.equal(response.status, 200);
     const newBrand = (await response.json()).brands.find((b: { name: string }) => b.name === 'QA Brand');
     assert.equal((await req('admin/brands', 'POST', { name: 'qa brand', logoUrl: '', active: true })).status, 409);
+    assert.equal(newBrand.logoScale, 1); assert.equal(newBrand.logoX, 0); assert.equal(newBrand.logoY, 0);
+    for (const invalid of [{ logoScale: 3.1 }, { logoScale: 0.4 }, { logoX: 51 }, { logoY: -51 }, { logoScale: '2' }, { logoX: null }]) {
+      assert.equal((await req(`admin/brands/${newBrand.id}`, 'PUT', { ...newBrand, ...invalid })).status, 400);
+    }
+    const layoutForm = new FormData(); layoutForm.set('name', newBrand.name); layoutForm.set('active', 'true');
+    layoutForm.set('logoScale', '1.5'); layoutForm.set('logoX', '12'); layoutForm.set('logoY', '-8');
+    response = await handleCatalogRequest(new Request(`http://localhost:8081/api/admin/brands/${newBrand.id}`, { method: 'PUT', headers: { Origin: 'http://localhost:8081', Cookie: cookie, 'X-CSRF-Token': csrf }, body: layoutForm }));
+    assert.equal(response.status, 200);
+    const adjusted = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+    assert.equal(adjusted.logoScale, 1.5); assert.equal(adjusted.logoX, 12); assert.equal(adjusted.logoY, -8);
+
     const newProduct = { ...p, brandSlug: newBrand.slug, categoryId: 'orais', name: 'Brand QA product' };
     response = await req('admin/products', 'POST', newProduct); assert.equal(response.status, 200);
     const linkedProduct = (await response.json()).products.find((p: { name: string }) => p.name === 'Brand QA product');
@@ -102,6 +113,7 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     const largeLogo = Buffer.concat([png, Buffer.alloc(5 * 1024 * 1024 - png.length)]);
     response = await upload(brandPath, 'PUT', largeLogo); assert.equal(response.status, 200);
     let savedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+    assert.equal(savedBrand.logoScale, 1.5); assert.equal(savedBrand.logoX, 12); assert.equal(savedBrand.logoY, -8);
     const firstLogo = savedBrand.logoUrl;
     assert.match(firstLogo, /^\/api\/logos\/[a-f0-9-]{36}$/);
     const imageResponse = await handleCatalogRequest(new Request(`http://localhost:8081${firstLogo}`));
@@ -124,7 +136,8 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     assert.equal((await req(`admin/brands/${newBrand.id}`, 'PUT', { name: 'Brand renamed', logoUrl: '', active: true })).status, 200);
     publicCatalog = await (await req('catalog')).json();
     assert.ok(publicCatalog.brands.some((b: { id: string }) => b.id === newBrand.id));
-    assert.equal(publicCatalog.brands.find((b: { id: string }) => b.id === newBrand.id).logoUrl, savedBrand.logoUrl);
+    const publicBrand = publicCatalog.brands.find((b: { id: string }) => b.id === newBrand.id);
+    assert.equal(publicBrand.logoUrl, savedBrand.logoUrl); assert.equal(publicBrand.logoScale, 1.5); assert.equal(publicBrand.logoX, 12); assert.equal(publicBrand.logoY, -8);
     assert.ok(publicCatalog.products.some((p: { id: string }) => p.id === linkedProduct.id));
     assert.equal(db.prepare('SELECT brandSlug FROM products WHERE id=?').get(linkedProduct.id)?.brandSlug, newBrand.slug);
     assert.equal((await req(`admin/products/${linkedProduct.id}`, 'DELETE')).status, 200);

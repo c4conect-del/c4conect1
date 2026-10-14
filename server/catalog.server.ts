@@ -55,7 +55,8 @@ async function brandBody(request: Request) {
   try { form = await new Response(bytes, { headers: { 'Content-Type': request.headers.get('content-type')! } }).formData(); }
   catch { fail('Upload inválido.'); }
   const active = form.get('active');
-  const input = { name: form.get('name'), active: active === 'true' ? true : active === 'false' ? false : undefined };
+  const layout = Object.fromEntries(['logoScale', 'logoX', 'logoY'].filter(key => form.has(key)).map(key => [key, form.get(key) === '' ? null : Number(form.get(key))]));
+  const input = { ...layout, name: form.get('name'), active: active === 'true' ? true : active === 'false' ? false : undefined };
   const file = form.get('logo');
   if (file === null) return { input, image: undefined };
   if (typeof file === 'string' || !file.size) fail('Selecione uma imagem válida.');
@@ -140,7 +141,12 @@ return async function handleCatalogRequest(request: Request) {
     const { input, image } = parsed; const name = text(input.name, 'Nome');
     if (kind === 'brands') {
       if (typeof input.active !== 'boolean') fail('Status da marca inválido.');
-      const previous = id ? await db.prepare('SELECT logoUrl FROM brands WHERE id=?').get(id) : undefined;
+      const previous = id ? await db.prepare('SELECT logoUrl, logoScale, logoX, logoY FROM brands WHERE id=?').get(id) : undefined;
+      const layout = ['logoScale', 'logoX', 'logoY'].map((key, index) => {
+        const value = input[key] === undefined ? previous?.[key] ?? (index === 0 ? 1 : 0) : input[key];
+        if (typeof value !== 'number' || !Number.isFinite(value) || value < (index === 0 ? 0.5 : -50) || value > (index === 0 ? 3 : 50)) fail('Ajuste da logo inválido.');
+        return value;
+      });
       // JSON status changes preserve the stored logo; new logos only arrive as files.
       if (input.logoUrl !== undefined && input.logoUrl !== '' && input.logoUrl !== previous?.logoUrl) fail('Envie a logo por upload. Links não são aceitos.');
       const logoUrl = image ? `/api/logos/${image.id}` : String(previous?.logoUrl || '');
@@ -154,11 +160,11 @@ return async function handleCatalogRequest(request: Request) {
             await db.prepare('INSERT INTO brand_logo_chunks VALUES (?,?,?)').run(image.id, offset / chunkSize, image.data.subarray(offset, offset + chunkSize).toString('base64'));
           }
         }
-        if (id) await db.prepare('UPDATE brands SET name=?, logoUrl=?, active=? WHERE id=?').run(name, logoUrl, input.active ? 1 : 0, id);
+        if (id) await db.prepare('UPDATE brands SET name=?, logoUrl=?, active=?, logoScale=?, logoX=?, logoY=? WHERE id=?').run(name, logoUrl, input.active ? 1 : 0, ...layout, id);
         else {
           let slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 96).replace(/-$/g, '') || 'marca';
           if (await db.prepare('SELECT id FROM brands WHERE slug=?').get(slug)) slug += '-' + randomUUID().slice(0, 8);
-          await db.prepare('INSERT INTO brands VALUES (?,?,?,?,?,?)').run(randomUUID(), slug, name, logoUrl, '', input.active ? 1 : 0);
+          await db.prepare('INSERT INTO brands (id,slug,name,logoUrl,logoKey,active,logoScale,logoX,logoY) VALUES (?,?,?,?,?,?,?,?,?)').run(randomUUID(), slug, name, logoUrl, '', input.active ? 1 : 0, ...layout);
         }
       } catch (error) {
         if (image) await db.prepare('DELETE FROM brand_logos WHERE id=?').run(image.id);

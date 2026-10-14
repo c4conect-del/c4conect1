@@ -172,7 +172,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .brand-card:active { background: #262820; border-color: var(--primary); }
 .brand-arrow { position: absolute; top: 11px; right: 11px; color: #777d67; }
 .brand-image { height: 98px; width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-.brand-image img { max-width: 100%; width: 95px; height: 95px; object-fit: contain; }
+.brand-image .brand-logo-frame { width: 95px !important; height: 95px !important; }
 .brand-card strong { font-size: 12px; color: #f1f2ed; overflow-wrap: anywhere; }
 .brand-card > span:last-child { font-size: 10px; color: #8c9196; margin-top: 4px; }
 .freight-section { margin-top: 25px; }
@@ -183,7 +183,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .nav-item.active { color: var(--primary); background: #ffe7000c; font-weight: 750; }
 .back-link { display: flex; align-items: center; gap: 9px; min-height: 44px; letter-spacing: 0; }
 .brand-hero { text-align: center; display: flex; flex-direction: column; align-items: center; margin: 0 0 25px; }
-.brand-hero img { width: 105px; height: 105px; object-fit: contain; margin-bottom: 16px; }
+.brand-hero .brand-logo-frame { width: 105px !important; height: 105px !important; margin-bottom: 16px; }
 .brand-hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin: 8px 0; }
 .brand-hero p { font-size: 12px; color: #8b9297; }
 .search-field { display: flex; align-items: center; gap: 10px; background: #17191c; border: 1px solid #ffffff10; border-radius: 14px; padding: 0 14px; min-height: 50px; color: #8d949d; }
@@ -279,7 +279,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-tabs button { min-width: 80px; padding: 0 9px; }
 .brand-monogram { display: grid; place-items: center; width: 85px; height: 85px; border-radius: 22px; background: #ffe70010; color: var(--primary); font-size: 28px; font-weight: 800; }
 .brand-admin-heading { display: flex; align-items: center; gap: 13px; }
-.brand-admin-heading img, .brand-admin-heading .brand-monogram { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; font-size: 20px; border-radius: 13px; }
+.brand-admin-heading .brand-logo-frame, .brand-admin-heading .brand-monogram { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; font-size: 20px; border-radius: 13px; }
 .brand-admin-actions { display: flex; gap: 8px; margin-top: 15px; }
 .brand-admin-actions button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; flex: 1; background: #ffffff06; border-radius: 11px; font-size: 12px; }
 .brand-admin-actions .delete-button { flex: 0 0 44px; color: #e19191; }
@@ -288,9 +288,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .logo-upload { display: grid; gap: 10px; font-size: 13px; }
 .logo-upload-preview { display: flex; align-items: center; justify-content: center; min-height: 128px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,.03); overflow: hidden; }
-.logo-upload-preview img { width: 112px; height: 112px; object-fit: contain; }
+
 .editor-form .logo-upload-button { position: relative; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; overflow: hidden; }
 .editor-form .logo-upload-button input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; padding: 0; cursor: pointer; }
 .logo-upload-button:focus-within { outline: 2px solid #f4ec00; outline-offset: 3px; }
 .logo-upload small { color: #9a9c9b; line-height: 1.5; }
 .logo-filename { overflow-wrap: anywhere; }
+
+.brand-logo-frame { display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; vertical-align: middle; }
+.brand-logo-frame img { width: 100%; height: 100%; max-width: none; object-fit: contain; transform-origin: center; }
+.logo-adjustments { display: grid; gap: 12px; }
+.logo-adjustments output { color: #f4ec00; }
+.editor-form .logo-adjustments input[type="range"] { min-height: 44px; padding: 0; border: 0; accent-color: #f4ec00; cursor: pointer; }
