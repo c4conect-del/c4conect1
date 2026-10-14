@@ -6,9 +6,18 @@ const dir = resolve(process.env.C4_DATA_DIR || 'data');
 const db = new DatabaseSync(resolve(dir, 'catalog.sqlite'), { readOnly: true });
 const quote = v => v === null ? 'NULL' : typeof v === 'number' ? String(v) : `'${String(v).replaceAll("'", "''")}'`;
 const lines = ['DELETE FROM brands;'];
-for (const table of ['brands', 'brand_logos', 'categories', 'products', 'consultants', 'metadata']) {
+for (const table of ['brands', 'brand_logos', 'brand_logo_chunks', 'categories', 'products', 'consultants', 'metadata']) {
   for (const row of db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()) {
-    lines.push(`INSERT ${table === 'metadata' ? 'OR IGNORE ' : ''}INTO ${table} (${Object.keys(row).join(',')}) VALUES (${Object.values(row).map(quote).join(',')});`);
+    const imageData = (table === 'brand_logos' || table === 'brand_logo_chunks') ? row.data : '';
+    const exportedRow = imageData ? { ...row, data: '' } : row;
+    lines.push(`INSERT ${table === 'metadata' ? 'OR IGNORE ' : ''}INTO ${table} (${Object.keys(exportedRow).join(',')}) VALUES (${Object.values(exportedRow).map(quote).join(',')});`);
+    // Keep each import statement below D1's SQL size limit.
+    if (imageData) {
+      const where = table === 'brand_logos' ? `id=${quote(row.id)}` : `logoId=${quote(row.logoId)} AND position=${quote(row.position)}`;
+      for (let offset = 0; offset < imageData.length; offset += 48000) {
+        lines.push(`UPDATE ${table} SET data=data || ${quote(imageData.slice(offset, offset + 48000))} WHERE ${where};`);
+      }
+    }
   }
 }
 writeFileSync(resolve(dir, 'cloudflare-import.sql'), lines.join('\n')+'\n', { mode: 0o600 });

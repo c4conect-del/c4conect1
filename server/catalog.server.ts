@@ -50,7 +50,7 @@ async function body(request: Request) {
 }
 async function brandBody(request: Request) {
   if (!request.headers.get('content-type')?.startsWith('multipart/form-data')) return { input: await body(request), image: undefined };
-  const bytes = await readBytes(request, 1024 * 1024 + 16384);
+  const bytes = await readBytes(request, 5 * 1024 * 1024 + 16384);
   let form: FormData;
   try { form = await new Response(bytes, { headers: { 'Content-Type': request.headers.get('content-type')! } }).formData(); }
   catch { fail('Upload inválido.'); }
@@ -59,14 +59,14 @@ async function brandBody(request: Request) {
   const file = form.get('logo');
   if (file === null) return { input, image: undefined };
   if (typeof file === 'string' || !file.size) fail('Selecione uma imagem válida.');
-  if (file.size > 1024 * 1024) fail('A logo deve ter no máximo 1 MB.', 413);
+  if (file.size > 5 * 1024 * 1024) fail('A logo deve ter no máximo 5 MB.', 413);
   const data = Buffer.from(await file.arrayBuffer());
   const png = data.length >= 33 && data.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) && data.toString('ascii', 12, 16) === 'IHDR' && data.readUInt32BE(16) > 0 && data.readUInt32BE(20) > 0;
   const jpeg = data.length >= 4 && data[0] === 255 && data[1] === 216 && data[2] === 255 && data[data.length - 2] === 255 && data[data.length - 1] === 217;
   const webp = data.length >= 20 && data.toString('ascii', 0, 4) === 'RIFF' && data.toString('ascii', 8, 12) === 'WEBP' && data.readUInt32LE(4) + 8 === data.length && ['VP8 ', 'VP8L', 'VP8X'].includes(data.toString('ascii', 12, 16));
   const mime = png ? 'image/png' : jpeg ? 'image/jpeg' : webp ? 'image/webp' : '';
   if (!mime || file.type !== mime) fail('Envie uma imagem PNG, JPG ou WebP válida.', 415);
-  return { input, image: { id: randomUUID(), mime, data: data.toString('base64') } };
+  return { input, image: { id: randomUUID(), mime, data } };
 }
 function cookie(value: string, request: Request, age = 28800) {
   return `c4_admin=${value}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${age}${new URL(publicOrigin || request.url).protocol === 'https:' ? '; Secure' : ''}`;
@@ -80,7 +80,8 @@ return async function handleCatalogRequest(request: Request) {
     if (logoMatch && request.method === 'GET') {
       const logo = await db.prepare("SELECT mime, data FROM brand_logos WHERE id=? AND EXISTS (SELECT 1 FROM brands WHERE logoUrl=?)").get(logoMatch[1], path);
       if (!logo) return json({ error: 'Logo não encontrada.' }, 404);
-      return new Response(Buffer.from(String(logo.data), 'base64'), { headers: { ...headers, 'Content-Type': String(logo.mime), 'Cache-Control': 'public, max-age=31536000, immutable' } });
+      const data = logo.data ? Buffer.from(String(logo.data), 'base64') : Buffer.concat((await db.prepare('SELECT data FROM brand_logo_chunks WHERE logoId=? ORDER BY position').all(logoMatch[1])).map(chunk => Buffer.from(String(chunk.data), 'base64')));
+      return new Response(data, { headers: { ...headers, 'Content-Type': String(logo.mime), 'Cache-Control': 'public, max-age=31536000, immutable' } });
     }
     if (path === '/api/catalog' && request.method === 'GET') return json(await catalog(false));
     if (path === '/api/admin/login' && request.method === 'POST') {
@@ -144,8 +145,15 @@ return async function handleCatalogRequest(request: Request) {
       if (input.logoUrl !== undefined && input.logoUrl !== '' && input.logoUrl !== previous?.logoUrl) fail('Envie a logo por upload. Links não são aceitos.');
       const logoUrl = image ? `/api/logos/${image.id}` : String(previous?.logoUrl || '');
       if (await db.prepare('SELECT id FROM brands WHERE lower(name)=lower(?) AND id<>?').get(name, id || '')) fail('Já existe uma marca com este nome.', 409);
-      if (image) await db.prepare('INSERT INTO brand_logos VALUES (?,?,?)').run(image.id, image.mime, image.data);
       try {
+        if (image) {
+          await db.prepare('INSERT INTO brand_logos VALUES (?,?,?)').run(image.id, image.mime, '');
+          // Each base64 chunk fits within D1's per-row size limit.
+          const chunkSize = 768 * 1024;
+          for (let offset = 0; offset < image.data.length; offset += chunkSize) {
+            await db.prepare('INSERT INTO brand_logo_chunks VALUES (?,?,?)').run(image.id, offset / chunkSize, image.data.subarray(offset, offset + chunkSize).toString('base64'));
+          }
+        }
         if (id) await db.prepare('UPDATE brands SET name=?, logoUrl=?, active=? WHERE id=?').run(name, logoUrl, input.active ? 1 : 0, id);
         else {
           let slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 96).replace(/-$/g, '') || 'marca';

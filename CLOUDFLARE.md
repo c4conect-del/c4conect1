@@ -61,6 +61,6 @@ Para um servidor Node com disco persistente, continua disponível `npm run build
 
 ## Logos por upload
 
-Em Marcas → Adicionar/Editar, envie um arquivo PNG, JPG ou WebP de até 1 MB. O formulário mostra uma prévia; salvar sem enviar outra imagem mantém a logo atual. Novos links externos não são aceitos.
+Em Marcas → Adicionar/Editar, envie um arquivo PNG, JPG ou WebP de até 5 MB. O formulário mostra uma prévia; salvar sem enviar outra imagem mantém a logo atual. Novos links externos não são aceitos.
 
-Os arquivos são armazenados em `brand_logos` no D1 (base64, fora do JSON do catálogo) e entregues por `/api/logos/<id>` com MIME validado, `nosniff` e cache por versão. A API verifica sessão, origem, CSRF, tamanho e assinatura do arquivo. Trocar a logo ou excluir a marca remove a imagem antiga do banco. As logos iniciais continuam como assets do projeto. Faça backup do banco inteiro para preservar as imagens junto com o catálogo.
+Os arquivos são armazenados em `brand_logos` e `brand_logo_chunks` no D1 (base64 em partes, fora do JSON do catálogo) e entregues por `/api/logos/<id>` com MIME validado, `nosniff` e cache por versão. A API verifica sessão, origem, CSRF, tamanho e assinatura do arquivo. Trocar a logo ou excluir a marca remove a imagem antiga do banco. As logos iniciais continuam como assets do projeto. Faça backup do banco inteiro para preservar as imagens junto com o catálogo.
