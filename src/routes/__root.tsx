@@ -41,8 +41,8 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "C4 IMPORTS" },
       { name: "twitter:description", content: "C4 IMPORTS" },
-      { property: "og:image", content: "https://c4conect1.c4conect1.workers.dev/c4-imports.png" },
-      { name: "twitter:image", content: "https://c4conect1.c4conect1.workers.dev/c4-imports.png" },
+      { property: "og:image", content: "https://c4imports.com/c4-imports.png" },
+      { name: "twitter:image", content: "https://c4imports.com/c4-imports.png" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/c4-imports.png" },

@@ -206,7 +206,9 @@ IMPORTANTE:
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://c4conect1.c4conect1.workers.dev
+**Site**: https://c4imports.com
+
+**Endereço alternativo**: https://c4conect1.c4conect1.workers.dev
 
 ## Build with Lovable
 

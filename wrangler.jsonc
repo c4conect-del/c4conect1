@@ -18,5 +18,16 @@
       "migrations_dir": "migrations"
     }
   ],
-  "account_id": "7ec999341c00c1cfdc7e1801a7dbc9b6"
+  "account_id": "7ec999341c00c1cfdc7e1801a7dbc9b6",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "c4imports.com/*",
+      "zone_id": "3edbef57b32496d6dfc5ccb9414fd400"
+    },
+    {
+      "pattern": "www.c4imports.com/*",
+      "zone_id": "3edbef57b32496d6dfc5ccb9414fd400"
+    }
+  ]
 }

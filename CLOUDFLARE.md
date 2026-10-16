@@ -1,6 +1,8 @@
 # Cloudflare Workers + D1
 
-Site: https://c4conect1.c4conect1.workers.dev
+Site: https://c4imports.com
+
+Também disponível em https://www.c4imports.com e https://c4conect1.c4conect1.workers.dev
 
 O acesso privado do admin está em `ADMIN-ACCESS.local.md`.
 
@@ -66,3 +68,9 @@ Em Marcas → Adicionar/Editar, envie um arquivo PNG, JPG ou WebP de até 5 MB. 
 Os arquivos são armazenados em `brand_logos` e `brand_logo_chunks` no D1 (base64 em partes, fora do JSON do catálogo) e entregues por `/api/logos/<id>` com MIME validado, `nosniff` e cache por versão. A API verifica sessão, origem, CSRF, tamanho e assinatura do arquivo. Trocar a logo ou excluir a marca remove a imagem antiga do banco. As logos iniciais continuam como assets do projeto. Faça backup do banco inteiro para preservar as imagens junto com o catálogo.
 
 Os ajustes de escala e posição são salvos na marca, sem alterar a imagem enviada. A mesma prévia e enquadramento são usados no catálogo, página da marca, carrossel e lista do admin.
+
+## Domínio próprio
+
+A configuração de `wrangler.jsonc` inclui rotas para `c4imports.com/*` e `www.c4imports.com/*`, mantendo o endereço `workers.dev` disponível. O domínio está na conta `c4conect@gmail.com`, zona `3edbef57b32496d6dfc5ccb9414fd400`, no plano Free. Na Hostinger, os nameservers são `art.ns.cloudflare.com` e `tricia.ns.cloudflare.com`. Os registros DNS de `c4imports.com` e `www.c4imports.com` precisam continuar com o proxy da Cloudflare ativado (nuvem laranja). As rotas enviam todas as páginas e APIs desses hosts ao Worker; os registros importados não precisam ser excluídos. HTTPS depende da ativação da zona e do certificado Universal SSL na Cloudflare.
+
+O perfil local de autenticação deste projeto é `c4-imports`. Para vincular novamente a pasta ao perfil já autenticado, use `npx wrangler auth activate c4-imports`. O login do admin funciona no novo domínio com o mesmo token e senha pelo caminho `/gestao-c4`; cookies de sessão são específicos de cada endereço.
