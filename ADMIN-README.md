@@ -1,4 +1,4 @@
-# C4 — Catálogo e administração
+# C4 IMPORTS — Catálogo e administração
 
 Interface mobile de 320 a 480px. Em telas maiores, o aplicativo continua centralizado no formato mobile. A administração não tem links no catálogo público.
 

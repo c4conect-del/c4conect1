@@ -6,7 +6,7 @@ import { BrandConsultation } from '@/components/BrandConsultation';
 import { ConsultantManager } from '@/components/ConsultantManager';
 import { ApiError, api, money, useCatalog, type Catalog, type CatalogProduct, type Category } from '@/data/catalog';
 export const Route = createFileRoute('/gestao-c4')({
-  head: () => ({ meta: [{ title: 'Gestão privada • C4' }, { name: 'robots', content: 'noindex, nofollow, noarchive' }, { name: 'referrer', content: 'no-referrer' }] }),
+  head: () => ({ meta: [{ title: 'Gestão privada • C4 IMPORTS' }, { name: 'robots', content: 'noindex, nofollow, noarchive' }, { name: 'referrer', content: 'no-referrer' }] }),
   component: AdminPage,
 });
 type Session = Catalog & { csrf: string };
@@ -62,13 +62,13 @@ function AdminPage() {
   function editCategory(c?: Category) { setError(''); setCategoryName(c?.name || ''); setEditor({ kind: 'categories', id: c?.id }); }
   function closeModal() { if (!busy) { setEditor(null); setDeletion(null); setError(''); } }
   if (checking) return <div className="admin-login"><LockKeyhole className="text-primary"/><p role="status">Verificando acesso…</p></div>;
-  if (!session) return <main className="admin-login"><div className="admin-lock"><LockKeyhole size={28}/></div><span className="eyebrow">ÁREA PRIVADA</span><h1>Gestão C4</h1><p>Acesso reservado ao administrador.</p>
+  if (!session) return <main className="admin-login"><div className="admin-lock"><LockKeyhole size={28}/></div><span className="eyebrow">ÁREA PRIVADA</span><h1>Gestão C4 IMPORTS</h1><p>Acesso reservado ao administrador.</p>
     {hasToken ? <form onSubmit={login} className="login-form"><label>Senha de acesso<div className="password-field"><input type={showPassword ? 'text' : 'password'} required maxLength={256} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Digite sua senha"/><button type="button" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button></div></label>{error && <p role="alert" className="error-message">{error}</p>}<button className="primary-button" disabled={busy}>{busy ? 'Verificando…' : 'Entrar no painel'}</button><small>Sessão protegida • expira em 8 horas</small></form> : <div className="status-box"><p>Abra seu link privado com token para entrar.</p>{error && <p role="alert">{error}</p>}</div>}
     <Link to="/catalogo" className="text-link">Voltar ao catálogo</Link></main>;
   const brands = session.brands;
   const filtered = session.products.filter(p => (!brandFilter || p.brandSlug === brandFilter) && (!categoryFilter || p.categoryId === categoryFilter) && `${p.name} ${p.dosage}`.toLocaleLowerCase('pt-BR').includes(query.toLocaleLowerCase('pt-BR')));
   return <div className="admin-page">
-    <header className="app-header"><span><b>C4</b> / GESTÃO</span><button className="icon-button" onClick={() => void logout()} disabled={busy} aria-label="Sair do painel"><LogOut size={19}/></button></header>
+    <header className="app-header"><span><b>C4 IMPORTS</b> / GESTÃO</span><button className="icon-button" onClick={() => void logout()} disabled={busy} aria-label="Sair do painel"><LogOut size={19}/></button></header>
     <main className="page-content">
       <div className="admin-title"><span className="eyebrow">CONTROLE DO CATÁLOGO</span><h1>Seu painel.</h1><p>Organize. Atualize. Publique.</p><Link to="/catalogo">Ver catálogo <ArrowUpRight size={16}/></Link></div>
       <div className="admin-stats"><div><Package size={19}/><b>{session.products.length}</b><span>Produtos</span></div><div><Layers size={19}/><b>{session.categories.length}</b><span>Categorias</span></div></div>

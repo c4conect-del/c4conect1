@@ -1,6 +1,6 @@
-# C4 Pharma Nexus
+# C4 IMPORTS
 
-Crie um sistema web interativo estilo aplicativo premium para a marca C4 PHARMA, uma linha multimarca da C4 LABS.
+Crie um sistema web interativo estilo aplicativo premium para a marca C4 IMPORTS, uma linha multimarca da C4 LABS.
 
 O projeto deve ter estética DARK, futurista, premium e agressiva, com iluminação neon amarela (#ffe700) e detalhes em dourado.
 
@@ -16,7 +16,7 @@ HOME (HUB DE MARCAS)
 
 - Título central:
 
-  "C4 PHARMA"
+  "C4 IMPORTS"
 
   Subtítulo:
 
@@ -42,7 +42,7 @@ Marcas:
 
 7. Canada Labs
 
-8. C4 Pharma (marca principal)
+8. C4 IMPORTS (marca principal)
 
 --------------------------------------
 

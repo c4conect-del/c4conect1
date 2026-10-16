@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { MessageCircle, ArrowUpRight, X } from 'lucide-react';
 import { useCatalog } from '@/data/catalog';
-export function ConsultantContact({ className, label = 'Consultor', message = 'Olá! Gostaria de falar com um consultor C4.' }: { className: string; label?: string; message?: string }) {
+export function ConsultantContact({ className, label = 'Consultor', message = 'Olá! Gostaria de falar com um consultor C4 IMPORTS.' }: { className: string; label?: string; message?: string }) {
   const { catalog, loading, error } = useCatalog();
   const dialog = useRef<HTMLDialogElement>(null);
   const contacts = catalog.consultants;

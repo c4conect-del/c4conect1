@@ -5,7 +5,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { ConsultantContact } from '@/components/ConsultantContact';
 import { ProductTable } from '@/components/ProductTable';
 import { ArrowLeft, Search, Check } from 'lucide-react';
-export const Route = createFileRoute('/marca/$slug')({ component: BrandPage, head: () => ({ meta: [{ title: 'Marca • C4 PHARMA' }] }) });
+export const Route = createFileRoute('/marca/$slug')({ component: BrandPage, head: () => ({ meta: [{ title: 'Marca • C4 IMPORTS' }] }) });
 function BrandPage() {
   const { slug } = Route.useParams();
   const { catalog, brands, loading, error } = useCatalog();
@@ -22,7 +22,7 @@ function BrandPage() {
   const message = chosen.length ? `Olá! Gostaria de verificar a disponibilidade:\n${chosen.map(p => `• ${p.name} ${p.dosage}`).join('\n')}\nMarca: ${brand.name}` : `Olá! Gostaria de falar sobre os produtos ${brand.name}.`;
   const toggle = (id: string) => setSelected(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   return <div>
-    <header className="app-header"><Link to="/catalogo" className="back-link"><ArrowLeft size={19}/> Marcas</Link><span className="eyebrow">C4 PHARMA</span></header>
+    <header className="app-header"><Link to="/catalogo" className="back-link"><ArrowLeft size={19}/> Marcas</Link><span className="eyebrow">C4 IMPORTS</span></header>
     <main className="page-content brand-page">
       <div className="brand-hero"><BrandLogo brand={brand} size={110}/><span className="eyebrow">CATÁLOGO DA MARCA</span><h1>{brand.name}</h1><p>{products.length} produtos • Selecione para consultar</p></div>
       <label className="search-field"><Search size={19}/><input aria-label="Buscar nesta marca" type="search" placeholder="Buscar nesta marca" value={query} onChange={e => setQuery(e.target.value)}/></label>

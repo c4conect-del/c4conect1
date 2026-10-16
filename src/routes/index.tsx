@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import { ArrowRight, ShieldCheck, Truck, CreditCard, PackageCheck, AlertTriangle, Lock } from "lucide-react";
-import logoC4 from "@/assets/c4-pharma.png";
+const logoC4 = "/c4-imports.png";
 
 // Lazy-load decorative + below-the-fold components for faster mobile boot
 const ParticleBackground = lazy(() =>
@@ -14,9 +14,9 @@ const BrandCarousel = lazy(() =>
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "C4 PHARMA — Distribuidora de Produtos Importados" },
-      { name: "description", content: "C4 PHARMA — Distribuidora oficial de produtos 100% originais. Confiabilidade, credibilidade e qualidade comprovadas." },
-      { property: "og:title", content: "C4 PHARMA — Distribuidora de Produtos Importados" },
+      { title: "C4 IMPORTS — Distribuidora de Produtos Importados" },
+      { name: "description", content: "C4 IMPORTS — Distribuidora oficial de produtos 100% originais. Confiabilidade, credibilidade e qualidade comprovadas." },
+      { property: "og:title", content: "C4 IMPORTS — Distribuidora de Produtos Importados" },
       { property: "og:description", content: "Produtos 100% originais. Confiabilidade, credibilidade e qualidade." },
     ],
   }),
@@ -35,15 +35,15 @@ function WelcomePage() {
         <div className="mb-8 flex flex-col items-center animate-fade-in">
           <img
             src={logoC4}
-            alt="C4 PHARMA"
-            width={256}
-            height={128}
+            alt="C4 IMPORTS"
+            width={986}
+            height={889}
             decoding="async"
             fetchPriority="high"
-            className="h-24 w-auto drop-shadow-[0_0_40px_rgba(255,231,0,0.4)] "
+            className="h-36 w-40 object-contain drop-shadow-[0_0_40px_rgba(255,231,0,0.4)] "
           />
           <h1 className="mt-4 text-center text-3xl font-black tracking-tight text-foreground neon-glow ">
-            C4 PHARMA
+            C4 IMPORTS
           </h1>
           <p className="mt-2 text-center text-sm font-semibold uppercase tracking-widest text-primary ">
             Distribuidora Oficial
