@@ -50,13 +50,24 @@ async function body(request: Request) {
 }
 async function brandBody(request: Request) {
   if (!request.headers.get('content-type')?.startsWith('multipart/form-data')) return { input: await body(request), image: undefined };
-  const bytes = await readBytes(request, 5 * 1024 * 1024 + 16384);
+  const bytes = await readBytes(request, 5 * 1024 * 1024 + 512 * 1024 + 16384);
   let form: FormData;
   try { form = await new Response(bytes, { headers: { 'Content-Type': request.headers.get('content-type')! } }).formData(); }
   catch { fail('Upload inválido.'); }
   const active = form.get('active');
   const layout = Object.fromEntries(['logoScale', 'logoX', 'logoY'].filter(key => form.has(key)).map(key => [key, form.get(key) === '' ? null : Number(form.get(key))]));
   const input = { ...layout, name: form.get('name'), active: active === 'true' ? true : active === 'false' ? false : undefined };
+  const preview = form.get('logoPreview');
+  let optimized: { mime: string; data: string } | undefined;
+  if (preview !== null) {
+    if (typeof preview === 'string' || !preview.size || preview.size > 512 * 1024) fail('Prévia da logo inválida.');
+    const bytes = Buffer.from(await preview.arrayBuffer());
+    const webp = bytes.length >= 20 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP' && bytes.readUInt32LE(4) + 8 === bytes.length && ['VP8 ', 'VP8L', 'VP8X'].includes(bytes.toString('ascii', 12, 16));
+    const png = bytes.length >= 33 && bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) && bytes.toString('ascii', 12, 16) === 'IHDR' && bytes.readUInt32BE(16) > 0 && bytes.readUInt32BE(20) > 0;
+    const mime = webp ? 'image/webp' : png ? 'image/png' : '';
+    if (!mime || preview.type !== mime) fail('Prévia da logo inválida.', 415);
+    optimized = { mime, data: bytes.toString('base64') };
+  }
   const file = form.get('logo');
   if (file === null) return { input, image: undefined };
   if (typeof file === 'string' || !file.size) fail('Selecione uma imagem válida.');
@@ -67,7 +78,7 @@ async function brandBody(request: Request) {
   const webp = data.length >= 20 && data.toString('ascii', 0, 4) === 'RIFF' && data.toString('ascii', 8, 12) === 'WEBP' && data.readUInt32LE(4) + 8 === data.length && ['VP8 ', 'VP8L', 'VP8X'].includes(data.toString('ascii', 12, 16));
   const mime = png ? 'image/png' : jpeg ? 'image/jpeg' : webp ? 'image/webp' : '';
   if (!mime || file.type !== mime) fail('Envie uma imagem PNG, JPG ou WebP válida.', 415);
-  return { input, image: { id: randomUUID(), mime, data } };
+  return { input, image: { id: randomUUID(), mime, data, optimized } };
 }
 function cookie(value: string, request: Request, age = 28800) {
   return `c4_admin=${value}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${age}${new URL(publicOrigin || request.url).protocol === 'https:' ? '; Secure' : ''}`;
@@ -77,12 +88,14 @@ return async function handleCatalogRequest(request: Request) {
   const json = (data: unknown, status = 200) => Response.json(data, { status, headers });
   try {
     const path = new URL(request.url).pathname.replace(/\/$/, '');
-    const logoMatch = path.match(/^\/api\/logos\/([a-f0-9-]{36})$/);
+    const logoMatch = path.match(/^\/api\/logos\/([a-f0-9-]{36})(\/preview)?$/);
     if (logoMatch && request.method === 'GET') {
-      const logo = await db.prepare("SELECT mime, data FROM brand_logos WHERE id=? AND EXISTS (SELECT 1 FROM brands WHERE logoUrl=?)").get(logoMatch[1], path);
+      const originalPath = `/api/logos/${logoMatch[1]}`;
+      const optimized = logoMatch[2] ? await db.prepare("SELECT mime, data FROM brand_logos WHERE id=? AND EXISTS (SELECT 1 FROM brands WHERE logoUrl=?)").get(`${logoMatch[1]}-preview`, originalPath) : undefined;
+      const logo = optimized || await db.prepare("SELECT mime, data FROM brand_logos WHERE id=? AND EXISTS (SELECT 1 FROM brands WHERE logoUrl=?)").get(logoMatch[1], originalPath);
       if (!logo) return json({ error: 'Logo não encontrada.' }, 404);
       const data = logo.data ? Buffer.from(String(logo.data), 'base64') : Buffer.concat((await db.prepare('SELECT data FROM brand_logo_chunks WHERE logoId=? ORDER BY position').all(logoMatch[1])).map(chunk => Buffer.from(String(chunk.data), 'base64')));
-      return new Response(data, { headers: { ...headers, 'Content-Type': String(logo.mime), 'Cache-Control': 'public, max-age=31536000, immutable' } });
+      return new Response(data, { headers: { ...headers, 'Content-Type': String(logo.mime), 'Cache-Control': logoMatch[2] && !optimized ? 'public, max-age=60' : 'public, max-age=31536000, immutable' } });
     }
     if (path === '/api/catalog' && request.method === 'GET') return json(await catalog(false));
     if (path === '/api/admin/login' && request.method === 'POST') {
@@ -160,6 +173,7 @@ return async function handleCatalogRequest(request: Request) {
             await db.prepare('INSERT INTO brand_logo_chunks VALUES (?,?,?)').run(image.id, offset / chunkSize, image.data.subarray(offset, offset + chunkSize).toString('base64'));
           }
         }
+        if (image?.optimized) await db.prepare('INSERT INTO brand_logos VALUES (?,?,?)').run(`${image.id}-preview`, image.optimized.mime, image.optimized.data);
         if (id) await db.prepare('UPDATE brands SET name=?, logoUrl=?, active=?, logoScale=?, logoX=?, logoY=? WHERE id=?').run(name, logoUrl, input.active ? 1 : 0, ...layout, id);
         else {
           let slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 96).replace(/-$/g, '') || 'marca';

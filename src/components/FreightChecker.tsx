@@ -69,7 +69,7 @@ export function FreightChecker() {
     <div className="w-full mb-8 animate-fade-in">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 rounded-xl glass neon-border-glow px-4 py-3 transition-all hover:bg-primary/5"
+        className="w-full flex items-center justify-between gap-3 rounded-xl glass  px-4 py-3 transition-colors hover:bg-primary/5"
         aria-expanded={open}
       >
         <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function FreightChecker() {
             <Truck className="h-5 w-5 text-primary" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-primary neon-glow">Verificar Frete</p>
+            <p className="text-sm font-bold text-primary ">Verificar Frete</p>
             <p className="text-xs text-muted-foreground">Envio por transportadora</p>
           </div>
         </div>
@@ -89,7 +89,7 @@ export function FreightChecker() {
       </button>
 
       {open && (
-        <div className="mt-3 overflow-hidden rounded-xl glass neon-border-glow animate-fade-in-up">
+        <div className="mt-3 overflow-hidden rounded-xl glass  animate-fade-in-up">
           {/* UF Selector */}
           <div className="border-b border-border/30 p-4">
             <label htmlFor="uf-select" className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -121,7 +121,7 @@ export function FreightChecker() {
                       <p className="text-xs text-muted-foreground">{selectedName}</p>
                       <p className="text-sm font-semibold text-foreground">Valor do frete</p>
                     </div>
-                    <p className="text-2xl font-black text-primary neon-glow">
+                    <p className="text-2xl font-black text-primary ">
                       {formatPrice(calculatedPrice)}
                     </p>
                   </div>

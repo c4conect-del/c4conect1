@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { brandView, type CatalogBrand } from './brands';
 export type Category = { id: string; name: string };
 export type CatalogProduct = { id: string; brandSlug: string; categoryId: string; name: string; dosage: string; price: number; onRequest: boolean };
@@ -13,21 +13,40 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
   if (!response.ok) throw new ApiError(data.error || 'Não foi possível carregar os dados.', response.status);
   return data;
 }
-const Context = createContext<{ catalog: Catalog; loading: boolean; error: string; refresh: () => Promise<void> } | null>(null);
+const Context = createContext<{ catalog: Catalog; brands: ReturnType<typeof brandView>[]; loading: boolean; error: string; refresh: () => Promise<void> } | null>(null);
 export function CatalogProvider({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: location => location.pathname });
   const [catalog, setCatalog] = useState<Catalog>({ brands: [], consultants: [], categories: [], products: [] });
   const [loading, setLoading] = useState(true); const [error, setError] = useState('');
-  const refresh = useCallback(async () => {
-    try { setCatalog(await api<Catalog>('/api/catalog')); setError(''); }
-    catch (e) { setError((e as Error).message); }
-    finally { setLoading(false); }
+  const pending = useRef<Promise<void> | null>(null);
+  const updatedAt = useRef(0);
+  const load = useCallback(() => {
+    const request = (async () => {
+      try { setCatalog(await api<Catalog>('/api/catalog')); updatedAt.current = Date.now(); setError(''); }
+      catch (e) { setError((e as Error).message); }
+      finally { setLoading(false); }
+    })();
+    pending.current = request;
+    void request.finally(() => { if (pending.current === request) pending.current = null; });
+    return request;
   }, []);
-  useEffect(() => { void refresh(); }, [refresh, pathname]);
-  useEffect(() => { const onFocus = () => void refresh(); const onVisible = () => { if (document.visibilityState === 'visible') void refresh(); }; window.addEventListener('focus', onFocus); document.addEventListener('visibilitychange', onVisible); return () => { window.removeEventListener('focus', onFocus); document.removeEventListener('visibilitychange', onVisible); }; }, [refresh]);
-  return <Context.Provider value={{ catalog, loading, error, refresh }}>{children}</Context.Provider>;
+  // Explicit refresh after an admin save must run after any older request.
+  const refresh = useCallback(async () => { if (pending.current) await pending.current; await load(); }, [load]);
+  const refreshIfStale = useCallback(() => {
+    if (pending.current || (updatedAt.current && Date.now() - updatedAt.current < 30000)) return;
+    void load();
+  }, [load]);
+  useEffect(() => { refreshIfStale(); }, [refreshIfStale, pathname]);
+  useEffect(() => {
+    const onFocus = () => { if (document.visibilityState === 'visible') refreshIfStale(); };
+    window.addEventListener('focus', onFocus); document.addEventListener('visibilitychange', onFocus);
+    return () => { window.removeEventListener('focus', onFocus); document.removeEventListener('visibilitychange', onFocus); };
+  }, [refreshIfStale]);
+  const brands = useMemo(() => catalog.brands.map(brandView), [catalog.brands]);
+  const value = useMemo(() => ({ catalog, brands, loading, error, refresh }), [catalog, brands, loading, error, refresh]);
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 }
-export function useCatalog() { const value = useContext(Context); if (!value) throw new Error('Catálogo indisponível'); return { ...value, brands: value.catalog.brands.map(brandView) }; }
+export function useCatalog() { const value = useContext(Context); if (!value) throw new Error('Catálogo indisponível'); return value; }
 export function CatalogStatus() {
   const { loading, error, refresh } = useCatalog();
   return loading ? <p className="status-box" role="status">Carregando catálogo…</p> : error ? <div className="status-box" role="alert"><p>{error}</p><button onClick={() => void refresh()}>Tentar novamente</button></div> : null;

@@ -50,3 +50,11 @@ npm run build
 ```
 
 O teste usa um banco temporário e cobre acesso sem sessão, token/senha incorretos, CSRF/origem, CRUD, persistência, integridade de categorias, logout, expiração e bloqueio de tentativas. Também verifica upload autenticado, formatos e limite de tamanho, entrega da imagem, persistência e limpeza ao trocar/excluir logos.
+
+## Desempenho mobile
+
+O fundo decorativo é estático; as marcas parceiras usam rolagem horizontal nativa. As barras fixas e os cartões dispensam desfoque de fundo durante a rolagem. As transições usam duração curta e respeitam a preferência de movimento reduzido.
+
+Os uploads mantêm o arquivo original e também geram uma prévia WebP de até 1024px para exibição no catálogo. A rota `/api/logos/<id>/preview` entrega a versão leve; quando não existe, usa o original com cache curto até a otimização. Para marcas já cadastradas, `npm run logos:optimize` simula a conversão; `npm run logos:optimize -- --apply` grava apenas as prévias no D1, usando o perfil Cloudflare `c4-imports`.
+
+O catálogo reaproveita dados carregados por 30 segundos durante a navegação e agrupa eventos de retorno à aba em uma única consulta. Salvar no admin força uma leitura nova após eventuais consultas anteriores, mantendo as alterações visíveis imediatamente.

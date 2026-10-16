@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useCatalog } from "@/data/catalog";
@@ -13,7 +13,7 @@ interface SearchResult {
 
 export function ProductSearch() {
   const { catalog, brands } = useCatalog();
-  const allProducts: SearchResult[] = catalog.products.map(p => ({ productName: p.name, dosage: p.dosage, brandName: brands.find(b => b.slug === p.brandSlug)?.name || p.brandSlug, brandSlug: p.brandSlug, type: catalog.categories.find(c => c.id === p.categoryId)?.name || "" }));
+  const allProducts: SearchResult[] = useMemo(() => catalog.products.map(p => ({ productName: p.name, dosage: p.dosage, brandName: brands.find(b => b.slug === p.brandSlug)?.name || p.brandSlug, brandSlug: p.brandSlug, type: catalog.categories.find(c => c.id === p.categoryId)?.name || "" })), [catalog.products, catalog.categories, brands]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -50,11 +50,11 @@ export function ProductSearch() {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          className="w-full rounded-xl glass neon-border-glow pl-10 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground bg-transparent outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+          className="w-full rounded-xl glass  pl-10 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground bg-transparent outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
         />
       </div>
       {open && filtered.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl glass neon-border-glow overflow-hidden shadow-2xl max-h-80 overflow-y-auto">
+        <div className="absolute z-50 mt-2 w-full rounded-xl glass  overflow-hidden shadow-2xl max-h-80 overflow-y-auto">
           {Object.entries(grouped).map(([slug, items]) => (
             <div key={slug}>
               <div className="px-4 py-2 text-xs font-bold text-primary uppercase tracking-wider border-b border-border/30">
@@ -77,7 +77,7 @@ export function ProductSearch() {
         </div>
       )}
       {open && query.length >= 2 && filtered.length === 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl glass neon-border-glow p-4 text-center text-sm text-muted-foreground">
+        <div className="absolute z-50 mt-2 w-full rounded-xl glass  p-4 text-center text-sm text-muted-foreground">
           Nenhum produto encontrado
         </div>
       )}

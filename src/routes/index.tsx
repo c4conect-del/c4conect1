@@ -1,15 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
+import { BrandCarousel } from "@/components/BrandCarousel";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import { ArrowRight, ShieldCheck, Truck, CreditCard, PackageCheck, AlertTriangle, Lock } from "lucide-react";
 const logoC4 = "/c4-imports.png";
-
-// Lazy-load decorative + below-the-fold components for faster mobile boot
-const ParticleBackground = lazy(() =>
-  import("@/components/ParticleBackground").then((m) => ({ default: m.ParticleBackground })),
-);
-const BrandCarousel = lazy(() =>
-  import("@/components/BrandCarousel").then((m) => ({ default: m.BrandCarousel })),
-);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,9 +19,7 @@ export const Route = createFileRoute("/")({
 function WelcomePage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <Suspense fallback={null}>
-        <ParticleBackground />
-      </Suspense>
+      <ParticleBackground />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col items-center px-4 py-10 ">
         {/* HERO */}
@@ -40,40 +31,38 @@ function WelcomePage() {
             height={889}
             decoding="async"
             fetchPriority="high"
-            className="h-36 w-40 object-contain drop-shadow-[0_0_40px_rgba(255,231,0,0.4)] "
+            className="h-32 w-36 object-contain  "
           />
-          <h1 className="mt-4 text-center text-3xl font-black tracking-tight text-foreground neon-glow ">
+          <h1 className="mt-4 text-center text-2xl font-bold tracking-tight text-foreground  ">
             C4 IMPORTS
           </h1>
-          <p className="mt-2 text-center text-sm font-semibold uppercase tracking-widest text-primary ">
+          <p className="mt-2 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground ">
             Distribuidora Oficial
           </p>
         </div>
 
         {/* Partner brand logos — infinite carousel */}
         <div className="w-full mb-8 animate-fade-in-up">
-          <Suspense fallback={<div className="h-24 w-full" />}>
-            <BrandCarousel />
-          </Suspense>
+          <BrandCarousel />
         </div>
 
         {/* CTA — Acessar tabela */}
         <Link
           to="/catalogo"
           preload="intent"
-          className="group relative mb-10 inline-flex w-full max-w-md items-center justify-between gap-4 rounded-2xl bg-primary px-6 py-5 font-black uppercase tracking-wider text-primary-foreground shadow-[0_0_40px_rgba(255,231,0,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_rgba(255,231,0,0.6)] animate-glow-pulse animate-fade-in-up"
+          className="group relative mb-10 inline-flex w-full max-w-md items-center justify-between gap-4 rounded-2xl bg-primary px-6 py-5 font-semibold text-primary-foreground  transition-colors active:scale-[0.99] animate-fade-in-up"
         >
           <div className="flex flex-col items-start">
-            <span className="text-lg ">Acessar a Tabela</span>
-            <span className="text-xs font-medium normal-case tracking-normal opacity-80">Clique aqui</span>
+            <span className="text-lg ">Ver catálogo</span>
+            <span className="text-xs font-medium normal-case tracking-normal opacity-80">Produtos organizados por marca</span>
           </div>
-          <ArrowRight className="h-7 w-7 transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
         </Link>
 
         {/* Sobre */}
         <section className="glass mb-6 w-full rounded-2xl p-6  animate-fade-in-up">
-          <h2 className="mb-4 text-xl font-bold text-primary neon-glow ">
-            Sobre a C4
+          <h2 className="mb-4 text-lg font-semibold text-foreground  ">
+            Sobre a C4 Imports
           </h2>
           <div className="space-y-3 text-sm leading-relaxed text-muted-foreground ">
             <p className="font-semibold text-foreground">
@@ -89,7 +78,7 @@ function WelcomePage() {
               <AlertTriangle className="mr-2 inline h-4 w-4 text-destructive" />
               Desconfie de preços baixos. Não seja enganado — o barato sai caro.
             </p>
-            <p className="text-center text-base font-black uppercase tracking-wider text-primary neon-glow ">
+            <p className="text-center text-sm font-medium text-muted-foreground  ">
               C4 é qualidade e confiança!
             </p>
           </div>
@@ -97,7 +86,7 @@ function WelcomePage() {
 
         {/* Informações de compra */}
         <section className="glass mb-6 w-full rounded-2xl p-6  animate-fade-in-up">
-          <h2 className="mb-5 text-xl font-bold text-primary neon-glow ">
+          <h2 className="mb-5 text-lg font-semibold text-foreground  ">
             Informações de Compra
           </h2>
 
@@ -152,7 +141,7 @@ function WelcomePage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <h2 className="text-xl font-bold text-primary neon-glow ">Seguro</h2>
+            <h2 className="text-lg font-semibold text-foreground  ">Seguro</h2>
           </div>
           <div className="space-y-3 text-sm leading-relaxed text-muted-foreground ">
             <p className="font-semibold text-foreground">
@@ -174,7 +163,7 @@ function WelcomePage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Lock className="h-5 w-5" />
             </div>
-            <h2 className="text-xl font-bold text-primary neon-glow ">Recebimento da Mercadoria</h2>
+            <h2 className="text-lg font-semibold text-foreground  ">Recebimento da Mercadoria</h2>
           </div>
           <div className="space-y-3 text-sm leading-relaxed text-muted-foreground ">
             <p>
@@ -188,7 +177,7 @@ function WelcomePage() {
               <AlertTriangle className="mr-2 inline h-4 w-4 text-destructive" />
               Se a caixa chegar danificada, aberta ou violada, <span className="font-bold">recuse a entrega</span>. Caso contrário, não nos responsabilizamos — mesmo com o seguro pago.
             </p>
-            <p className="pt-2 text-center text-base font-bold uppercase tracking-wider text-primary">
+            <p className="pt-2 text-center text-base font-semibold text-primary">
               Obrigado pela preferência.
             </p>
           </div>
@@ -198,9 +187,9 @@ function WelcomePage() {
         <Link
           to="/catalogo"
           preload="intent"
-          className="group inline-flex w-full max-w-md items-center justify-center gap-3 rounded-2xl border-2 border-primary bg-transparent px-6 py-4 font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
+          className="group inline-flex w-full max-w-md items-center justify-center gap-3 rounded-2xl border-2 border-primary bg-transparent px-6 py-4 font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
         >
-          <span>Acessar a Tabela</span>
+          <span>Ver catálogo</span>
           <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>

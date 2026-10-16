@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { scryptSync } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import sharp from 'sharp';
 const dir = mkdtempSync(join(tmpdir(), 'c4-test-'));
 process.env.C4_DATA_DIR = dir;
 const salt = 'test-salt'; const token = 'test-private-token'; const password = 'test-password';
@@ -14,7 +15,7 @@ let cookie = ''; let csrf = '';
 async function req(path: string, method = 'GET', body?: unknown, extra: Record<string,string> = {}, auth = true) {
   return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined }));
 }
-const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1kAAAAASUVORK5CYII=', 'base64');
+const png = await sharp({ create: { width: 1, height: 1, channels: 4, background: '#ffffff' } }).png().toBuffer();
 async function upload(path: string, method: string, bytes = png, mime = 'image/png', extra: Record<string,string> = {}, auth = true) {
   const form = new FormData(); form.set('name', 'Brand renamed'); form.set('active', 'false'); form.set('logo', new Blob([bytes], { type: mime }), 'logo.png');
   return handleCatalogRequest(new Request(`http://localhost:8081/api/${path}`, { method, headers: { Origin: 'http://localhost:8081', ...(auth ? { Cookie: cookie, 'X-CSRF-Token': csrf } : {}), ...extra }, body: form }));
@@ -115,8 +116,29 @@ test('server authentication, CRUD, persistence, category integrity, expiry and l
     let savedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
     assert.equal(savedBrand.logoScale, 1.5); assert.equal(savedBrand.logoX, 12); assert.equal(savedBrand.logoY, -8);
     const firstLogo = savedBrand.logoUrl;
+    const fallback = await handleCatalogRequest(new Request(`http://localhost:8081${firstLogo}/preview`));
+    assert.equal(fallback.status, 200); assert.equal(fallback.headers.get('content-type'), 'image/png'); assert.match(fallback.headers.get('cache-control')!, /max-age=60$/);
+    const webp = await sharp(png).webp().toBuffer();
+    const previewForm = new FormData(); previewForm.set('name', 'Brand renamed'); previewForm.set('active', 'false'); previewForm.set('logo', new Blob([png], { type: 'image/png' }), 'logo.png'); previewForm.set('logoPreview', new Blob([webp], { type: 'image/webp' }), 'preview.webp');
+    response = await handleCatalogRequest(new Request(`http://localhost:8081/api/${brandPath}`, { method: 'PUT', headers: { Origin: 'http://localhost:8081', Cookie: cookie, 'X-CSRF-Token': csrf }, body: previewForm }));
+    assert.equal(response.status, 200);
+    const optimizedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+    const optimizedResponse = await handleCatalogRequest(new Request(`http://localhost:8081${optimizedBrand.logoUrl}/preview`));
+    assert.equal(optimizedResponse.headers.get('content-type'), 'image/webp'); assert.deepEqual(Buffer.from(await optimizedResponse.arrayBuffer()), webp);
+    const originalResponse = await handleCatalogRequest(new Request(`http://localhost:8081${optimizedBrand.logoUrl}`));
+    assert.deepEqual(Buffer.from(await originalResponse.arrayBuffer()), png);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM brand_logos').get()?.count, 2);
+    previewForm.set('logoPreview', new Blob(['<svg onload="alert(1)"/>'], { type: 'image/png' }), 'invalid.png');
+    assert.equal((await handleCatalogRequest(new Request(`http://localhost:8081/api/${brandPath}`, { method: 'PUT', headers: { Origin: 'http://localhost:8081', Cookie: cookie, 'X-CSRF-Token': csrf }, body: previewForm }))).status, 415);
+    previewForm.set('logoPreview', new Blob([png], { type: 'image/png' }), 'fallback.png');
+    assert.equal((await handleCatalogRequest(new Request(`http://localhost:8081/api/${brandPath}`, { method: 'PUT', headers: { Origin: 'http://localhost:8081', Cookie: cookie, 'X-CSRF-Token': csrf }, body: previewForm }))).status, 200);
+
+    // Replacing this upload must clean up its preview as well as the original.
+    response = await upload(brandPath, 'PUT', largeLogo); assert.equal(response.status, 200);
+    savedBrand = (await response.json()).brands.find((b: { id: string }) => b.id === newBrand.id);
+
     assert.match(firstLogo, /^\/api\/logos\/[a-f0-9-]{36}$/);
-    const imageResponse = await handleCatalogRequest(new Request(`http://localhost:8081${firstLogo}`));
+    const imageResponse = await handleCatalogRequest(new Request(`http://localhost:8081${savedBrand.logoUrl}`));
     assert.equal(imageResponse.status, 200); assert.equal(imageResponse.headers.get('content-type'), 'image/png');
     assert.equal(imageResponse.headers.get('x-content-type-options'), 'nosniff');
     assert.deepEqual(Buffer.from(await imageResponse.arrayBuffer()), largeLogo);

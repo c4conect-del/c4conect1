@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus, Pencil, Trash2, Power, X, Upload } from 'lucide-react';
 import { brandView, type CatalogBrand, type CatalogProduct } from '@/data/catalog';
+import { createLogoPreview } from '@/lib/logo-upload';
 import { BrandLogo } from './BrandLogo';
-export function BrandManager({ brands, products, busy, error, onMutate }: {
+export function BrandManager({ brands, products, busy: mutating, error, onMutate }: {
   brands: CatalogBrand[]; products: CatalogProduct[]; busy: boolean; error: string;
   onMutate: (path: string, method: string, data?: unknown) => Promise<boolean>;
 }) {
+  const [preparing, setPreparing] = useState(false);
+  const busy = mutating || preparing;
   const [action, setAction] = useState<'edit' | 'delete' | 'status' | null>(null);
   const [brand, setBrand] = useState<CatalogBrand | null>(null);
   const [name, setName] = useState(''); const [logo, setLogo] = useState<File | null>(null); const [preview, setPreview] = useState(''); const [uploadError, setUploadError] = useState(''); const [active, setActive] = useState(true);
@@ -23,7 +26,7 @@ export function BrandManager({ brands, products, busy, error, onMutate }: {
     if (uploadError) return;
     let value: unknown;
     if (action === 'edit') {
-      const form = new FormData(); form.set('name', name); form.set('active', String(active)); Object.entries(layout).forEach(([key, value]) => form.set(key, String(value))); if (logo) form.set('logo', logo); value = form;
+      const form = new FormData(); form.set('name', name); form.set('active', String(active)); Object.entries(layout).forEach(([key, value]) => form.set(key, String(value))); if (logo) { setPreparing(true); const preview = await createLogoPreview(logo); setPreparing(false); form.set('logo', logo); if (preview) form.set('logoPreview', preview, preview.type === 'image/webp' ? 'logo-preview.webp' : 'logo-preview.png'); } value = form;
     } else if (brand) value = { ...brand, active: !brand.active };
     if (await onMutate(`/api/admin/brands${brand ? `/${brand.id}` : ''}`, action === 'delete' ? 'DELETE' : brand ? 'PUT' : 'POST', action === 'delete' ? undefined : value)) setAction(null);
   }
